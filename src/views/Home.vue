@@ -71,7 +71,7 @@
             </td>
             <td class="pt-3">
               <BeautifulProgressIndicator
-                :required="category.required_ects"
+                :required="category.requiredEcts"
                 :earned="category.earnedCredits"
                 :planned="category.plannedCredits"
                 :color="category.color"
@@ -127,7 +127,7 @@ import FocusComponent from '../components/Focus.vue';
 import BeautifulProgressIndicator from '../components/BeautifulProgressIndicator.vue';
 import ToastNotification from '../components/ToastNotification.vue';
 import {getColorForCategoryId} from '../helpers/color-helper';
-import type {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
+import {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
 import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
 
@@ -145,24 +145,7 @@ export default defineComponent({
     return {
       startSemester: undefined as SemesterInfo | undefined,
       studienordnung: '21' as '21' | '23',
-      selectableStartSemesters: [
-        currentSemester.minus(14),
-        currentSemester.minus(13),
-        currentSemester.minus(12),
-        currentSemester.minus(11),
-        currentSemester.minus(10),
-        currentSemester.minus(9),
-        currentSemester.minus(8),
-        currentSemester.minus(7),
-        currentSemester.minus(6),
-        currentSemester.minus(5),
-        currentSemester.minus(4),
-        currentSemester.minus(3),
-        currentSemester.minus(2),
-        currentSemester.minus(1),
-        currentSemester,
-        currentSemester.plus(1),
-      ] as SemesterInfo[],
+      selectableStartSemesters: SemesterInfo.selectableStartSemesters,
       semesters: [] as Semester[],
       modules: [] as Module[],
       categories: [] as Category[],
@@ -194,7 +177,6 @@ export default defineComponent({
           .length),
           availableModules: focus.modules
           .filter((module) => !plannedModuleIds.includes(module.id))
-          .map(module => this.modules.find(m => m.id === module.id)),
       }));
     },
     totalPlannedEcts() {
@@ -224,7 +206,7 @@ export default defineComponent({
           this.studienordnung = '21';
         }
 
-        this.semesters.forEach((s, i) => s.name = this.startSemester.plus(i).toString());
+        this.semesters.forEach(s => s.setName(this.startSemester));
       }
     },
     studienordnung: {
@@ -246,15 +228,17 @@ export default defineComponent({
     },
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
-      return (await response.json()).map((m: Module) => ({ ...m, nextPossibleSemester: SemesterInfo.getNextPossibleSemesterForModule(m.term)}));
+      const a = (await response.json());
+      console.log(a);
+      return a.map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, m.ects, m.term));
     },
     async getCategories(): Promise<Category[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_CATEGORIES}`);
-      return (await response.json()).map((c: Category) => ({ ...c, required_ects: Number(c.required_ects) }));
+      return (await response.json()).map(c => new Category(c.id, c.name, Number(c.required_ects), c.modules));
     },
     async getFocuses(): Promise<Focus[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_FOCUSES}`);
-      return response.ok ? response.json() : [];
+      return response.ok ? (await response.json()).map((f: Focus) => new Focus(f.id, f.name, f.modules.map(m => this.modules.find(mod => mod.id === m.id)))) : [];
     },
     getPlanDataFromUrl(): Semester[] {
       let path = window.location.hash;
@@ -306,10 +290,8 @@ export default defineComponent({
         const planData = hash
           .slice(planIndicator.length)
           .split(semesterSeparator)
-          .map((semesterPart, index) => ({
-            number: index + 1,
-            name: this.startSemester.plus(index).toString(),
-            modules: semesterPart
+          .map((semesterPart, index) =>
+          new Semester(index + 1, semesterPart
               .split(moduleSeparator)
               .filter((id) => !(isNullOrWhitespace(id)))
               .map((moduleId) => {
@@ -319,8 +301,8 @@ export default defineComponent({
                 }
                 return newModule!;
               })
-              .filter((module) => module),
-          }));
+              .filter((module) => module))
+          );
 
         if (newPath !== path) {
           window.location.hash = newPath;
@@ -439,11 +421,7 @@ export default defineComponent({
       this.updateUrlFragment();
     },
     addSemester() {
-      this.semesters.push({
-        number: this.semesters.length + 1,
-        modules: [],
-        name: this.startSemester.plus(this.semesters.length).toString()
-      });
+      this.semesters.push(new Semester(this.semesters.length, []));
     },
     removeSemester(semesterNumber: number) {
       this.semesters = this.semesters.filter((semester) => semester.number !== semesterNumber);

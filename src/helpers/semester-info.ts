@@ -7,6 +7,7 @@ export class SemesterInfo {
   readonly isSpringSemester: boolean;
   readonly year: number;
   static readonly maxNumberOfAllowedSemesters = 14;
+  static readonly selectableStartSemesters = [...Array(16)].map((_, i) => SemesterInfo.now().minus(14 - i));
 
   constructor(springSemester: boolean, year: number) {
     this.isSpringSemester = springSemester;
