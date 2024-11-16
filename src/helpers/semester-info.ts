@@ -69,9 +69,12 @@ export class SemesterInfo {
     }
   }
 
-  static getNextPossibleSemesterForModule(term: 'FS' | 'HS'): SemesterInfo {
+  static getNextPossibleSemesterForModule(term: 'FS' | 'HS', startSemester: SemesterInfo | undefined): SemesterInfo {
+    if(!startSemester) {
+      return undefined;
+    }
     const next = term === 'FS' ? SemesterInfo.nextSpringSemester() : SemesterInfo.nextAutumSemester();
-    if(next.difference(SemesterInfo.now()) >= SemesterInfo.maxNumberOfAllowedSemesters) {
+    if(next.difference(startSemester) >= SemesterInfo.maxNumberOfAllowedSemesters) {
       return undefined;
     }
     return next;

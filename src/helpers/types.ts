@@ -20,12 +20,11 @@ export class Module {
     this.categoriesForColoring = categoriesForColoring;
     this.ects = ects;
     this.term = term;
-
-    this.calculateNextPossibleSemester();
   }
 
-  private calculateNextPossibleSemester() {
-    this.nextPossibleSemester = SemesterInfo.getNextPossibleSemesterForModule(this.term);
+  calculateNextPossibleSemester(startSemester: SemesterInfo): Module {
+    this.nextPossibleSemester = SemesterInfo.getNextPossibleSemesterForModule(this.term, startSemester);
+    return this;
   }
 }
 
@@ -65,8 +64,9 @@ export class Semester {
     this.modules = modules;
   }
 
-  setName(startSemester: SemesterInfo) {
-    this.name = startSemester.plus(this.number - 1).toString();
+  setName(startSemester: SemesterInfo | undefined): Semester {
+    this.name = startSemester ? startSemester.plus(this.number - 1).toString() : undefined;
+    return this;
   }
 }
 

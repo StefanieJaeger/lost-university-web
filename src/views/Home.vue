@@ -21,7 +21,7 @@
       :key="semester.number"
       v-model:modules="semester.modules"
       class="bg-gray-200 rounded p-2 group/semester w-64 min-w-64"
-      :title="semester.name"
+      :title="semester.name ?? `${semester.number}`"
       :number="semester.number"
       :all-modules="modules"
       @on-module-deleted="(moduleId: string) => onModuleDeleted(semester.number, moduleId)"
@@ -177,6 +177,7 @@ export default defineComponent({
           .length),
           availableModules: focus.modules
           .filter((module) => !plannedModuleIds.includes(module.id))
+          .map((module) => this.modules.find(m => m.id === module.id))
       }));
     },
     totalPlannedEcts() {
@@ -206,7 +207,8 @@ export default defineComponent({
           this.studienordnung = '21';
         }
 
-        this.semesters.forEach(s => s.setName(this.startSemester));
+        this.semesters.forEach(s => s.setName(newStartSemester));
+        this.modules.forEach(m => m.calculateNextPossibleSemester(newStartSemester));
       }
     },
     studienordnung: {
@@ -228,9 +230,7 @@ export default defineComponent({
     },
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
-      const a = (await response.json());
-      console.log(a);
-      return a.map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, m.ects, m.term));
+      return (await response.json()).map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, m.ects, m.term));
     },
     async getCategories(): Promise<Category[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_CATEGORIES}`);
@@ -238,7 +238,7 @@ export default defineComponent({
     },
     async getFocuses(): Promise<Focus[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_FOCUSES}`);
-      return response.ok ? (await response.json()).map((f: Focus) => new Focus(f.id, f.name, f.modules.map(m => this.modules.find(mod => mod.id === m.id)))) : [];
+      return response.ok ? (await response.json()).map((f: Focus) => new Focus(f.id, f.name, f.modules)) : [];
     },
     getPlanDataFromUrl(): Semester[] {
       let path = window.location.hash;
@@ -302,6 +302,7 @@ export default defineComponent({
                 return newModule!;
               })
               .filter((module) => module))
+              .setName(this.startSemester)
           );
 
         if (newPath !== path) {
@@ -394,17 +395,9 @@ export default defineComponent({
             return;
         }
         let nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
-        if (!nextSemester) {
+        while(!nextSemester) {
           this.addSemester();
           nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
-          if (!nextSemester) {
-            this.addSemester();
-            nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
-            if (!nextSemester) {
-              this.showErrorMsg(`Es konnte kein Semester für das Modul ${moduleName} hinzugefügt werden`);
-              return;
-            }
-          }
         }
         nextSemester.modules.push(module);
       } else {
@@ -421,7 +414,7 @@ export default defineComponent({
       this.updateUrlFragment();
     },
     addSemester() {
-      this.semesters.push(new Semester(this.semesters.length, []));
+      this.semesters.push(new Semester(this.semesters.length + 1, []).setName(this.startSemester));
     },
     removeSemester(semesterNumber: number) {
       this.semesters = this.semesters.filter((semester) => semester.number !== semesterNumber);
