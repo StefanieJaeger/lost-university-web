@@ -1,9 +1,15 @@
+import { SemesterInfo } from "./semester-info";
+
 export type Module = {
   id: string,
   name: string,
   url: string,
   categories_for_coloring: string[],
   ects: number,
+  term: 'FS' | 'HS',
+
+  // undefined means there cannot be a next semester for this module (reached max semesters)
+  nextPossibleSemester: SemesterInfo | undefined,
 };
 
 export type Focus = {
@@ -21,6 +27,7 @@ export type Category = {
 
 export type Semester = {
   number: number,
+  name: string | undefined,
   modules: Module[],
 };
 

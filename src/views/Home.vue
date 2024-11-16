@@ -21,8 +21,7 @@
       :key="semester.number"
       v-model:modules="semester.modules"
       class="bg-gray-200 rounded p-2 group/semester w-64 min-w-64"
-      :title="startSemester === undefined
-        ? `${semester.number}` : startSemester.plus(semester.number - 1).toString()"
+      :title="semester.name"
       :number="semester.number"
       :all-modules="modules"
       @on-module-deleted="(moduleId: string) => onModuleDeleted(semester.number, moduleId)"
@@ -106,9 +105,9 @@
         >
           <FocusComponent
             :name="focus.name"
-            :all-modules="focus.modules"
-            :filtered-modules="focus.filteredModules"
+            :available-modules-for-focus="focus.availableModules"
             :number-of-missing-modules="focus.numberOfMissingModules"
+            @on-add-module-to-next-sem="addModule"
           />
         </div>
       </div>
@@ -132,7 +131,7 @@ import type {Category, Focus, Module, Semester, UnknownModule} from '../helpers/
 import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
 
-const BASE_URL = 'https://raw.githubusercontent.com/lost-university/data/4.3/data';
+const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
 const ROUTE_CATEGORIES = '/categories.json';
 const ROUTE_FOCUSES = '/focuses.json';
@@ -193,8 +192,9 @@ export default defineComponent({
         numberOfMissingModules: Math.max(0, numberOfModulesRequiredToGetFocus - focus.modules
           .filter((module) => plannedModuleIds.includes(module.id))
           .length),
-        filteredModules: focus.modules
-          .filter((module) => !plannedModuleIds.includes(module.id)),
+          availableModules: focus.modules
+          .filter((module) => !plannedModuleIds.includes(module.id))
+          .map(module => this.modules.find(m => m.id === module.id)),
       }));
     },
     totalPlannedEcts() {
@@ -223,6 +223,8 @@ export default defineComponent({
         } else {
           this.studienordnung = '21';
         }
+
+        this.semesters.forEach((s, i) => s.name = this.startSemester.plus(i).toString());
       }
     },
     studienordnung: {
@@ -244,7 +246,7 @@ export default defineComponent({
     },
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
-      return response.json();
+      return (await response.json()).map((m: Module) => ({ ...m, nextPossibleSemester: SemesterInfo.getNextPossibleSemesterForModule(m.term)}));
     },
     async getCategories(): Promise<Category[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_CATEGORIES}`);
@@ -306,6 +308,7 @@ export default defineComponent({
           .split(semesterSeparator)
           .map((semesterPart, index) => ({
             number: index + 1,
+            name: this.startSemester.plus(index).toString(),
             modules: semesterPart
               .split(moduleSeparator)
               .filter((id) => !(isNullOrWhitespace(id)))
@@ -387,7 +390,7 @@ export default defineComponent({
         .filter((module) => !category || category.modules.some((m) => m.id === module.id))
         .reduce(this.sumCredits, 0);
     },
-    addModule(moduleName: string, semesterNumber: number) {
+    addModule(moduleName: string, semesterNumber?: number) {
       const blockingSemesterNumber = this.getPlannedSemesterForModule(moduleName);
       if (blockingSemesterNumber) {
         const text = `Modul ${moduleName} ist bereits im Semester ${blockingSemesterNumber}`;
@@ -403,7 +406,29 @@ export default defineComponent({
         return;
       }
 
-      this.semesters[semesterNumber - 1].modules.push(module);
+      if(!semesterNumber) {
+        if(!module.nextPossibleSemester) {
+            this.showErrorMsg(`Kein nächstmögliches Semester für Modul ${moduleName} gefunden`);
+            return;
+        }
+        let nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
+        if (!nextSemester) {
+          this.addSemester();
+          nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
+          if (!nextSemester) {
+            this.addSemester();
+            nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
+            if (!nextSemester) {
+              this.showErrorMsg(`Es konnte kein Semester für das Modul ${moduleName} hinzugefügt werden`);
+              return;
+            }
+          }
+        }
+        nextSemester.modules.push(module);
+      } else {
+        this.semesters[semesterNumber - 1].modules.push(module);
+      }
+
       this.updateUrlFragment();
     },
     removeModule(semesterNumber: number, moduleId: string) {
@@ -417,6 +442,7 @@ export default defineComponent({
       this.semesters.push({
         number: this.semesters.length + 1,
         modules: [],
+        name: this.startSemester.plus(this.semesters.length).toString()
       });
     },
     removeSemester(semesterNumber: number) {

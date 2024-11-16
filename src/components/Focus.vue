@@ -25,15 +25,15 @@
     v-show="isOpen"
     class="p-4 shadow-lg mb-4"
   >
-    <p v-if="!filteredModules.length">
+    <p v-if="!availableModulesForFocus.length">
       Alle benötigten Module sind bestanden/geplant.
     </p>
-    <p v-if="filteredModules.length">
+    <p v-if="availableModulesForFocus.length">
       Für die Vertiefung können noch folgende Module geplant werden:
     </p>
     <ul class="list-disc list-inside text-sm mt-1">
       <li
-        v-for="module in filteredModules"
+        v-for="module in availableModulesForFocus"
         :key="module.id"
       >
         <a
@@ -42,6 +42,12 @@
           :href="'https://studien.ost.ch/' + module.url.replace('.json', '.html')"
         >{{ module.name }}
         </a>
+        <button
+          v-if="!!module.nextPossibleSemester"
+          class="bg-gray-800 text-white mx-3 p-1 rounded"
+          type="button"
+          @click="$emit('on-add-module-to-next-sem', module.name)"
+        >+ {{ module.nextPossibleSemester.toString() }}</button>
       </li>
     </ul>
   </div>
@@ -59,12 +65,7 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    allModules: {
-      required: true,
-      type: Array<Module>,
-      default: () => [],
-    },
-    filteredModules: {
+    availableModulesForFocus: {
       required: true,
       type: Array<Module>,
       default: () => [],
@@ -74,6 +75,7 @@ export default defineComponent({
       type: Number,
     }
   },
+  emits: ['on-add-module-to-next-sem'],
   data() {
     return {
       isOpen: false,
