@@ -2,11 +2,15 @@
   <div class="text-xs flex justify-between px-1 py-0.5">
     <span>{{ earned }} / {{ required }}</span>
     <span
-      v-if="planned > 0"
+      v-if="toBePlanned > 0"
       class="text-gray-400"
     >
-      {{ planned }} noch geplant
+    {{ toBePlanned }} zu planen
     </span>
+    <font-awesome-icon
+        v-if="toBePlanned <= 0"
+        :icon="['fa', 'check']"
+      />
   </div>
 
   <div class="bg-gray-200 relative h-5 w-48 rounded-full">
@@ -55,6 +59,9 @@ export default defineComponent({
     plannedProgress(): string {
       return `${Math.min(100, (100 * (this.planned + this.earned)) / this.required)}%`;
     },
+    toBePlanned(): number {
+      return this.required - this.earned - this.planned;
+    }
   },
 });
 </script>
