@@ -60,44 +60,7 @@
           </option>
         </select>
       </div>
-      <table>
-        <tbody>
-          <tr
-            v-for="category in mappedCategories"
-            :key="category.name"
-          >
-            <td class="align-bottom pr-4 text-end">
-              {{ category.name }}
-            </td>
-            <td class="pt-3">
-              <BeautifulProgressIndicator
-                :required="category.requiredEcts"
-                :earned="category.earnedCredits"
-                :planned="category.plannedCredits"
-                :color="category.color"
-              />
-            </td>
-            <td>
-              <div class="w-16">
-                <ModuleSearch :modules="category.modules" :showNextPossibleSemester="true" :widthClass="{'w-16': true}" @on-module-selected="(name: string) => addModule(name)"></ModuleSearch>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="align-bottom pr-4 text-end">
-              Total
-            </td>
-            <td class="pt-3">
-              <BeautifulProgressIndicator
-                :required="180"
-                :earned="totalEarnedEcts"
-                :planned="totalPlannedEcts"
-                :color="`orange`"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <Categories :categories="mappedCategories" :totalEarnedEcts="totalEarnedEcts" :totalPlannedEcts="totalPlannedEcts" @on-add-module="addModule"></Categories>
     </article>
     <article class="mx-4">
       <h2 class="text-xl">
@@ -129,13 +92,12 @@
 import {defineComponent} from 'vue';
 import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
-import BeautifulProgressIndicator from '../components/BeautifulProgressIndicator.vue';
 import ToastNotification from '../components/ToastNotification.vue';
 import {getColorForCategoryId} from '../helpers/color-helper';
 import {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
 import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
-import ModuleSearch from '../components/ModuleSearch.vue';
+import Categories from '../components/Categories.vue';
 
 const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
@@ -146,7 +108,7 @@ const currentSemester = SemesterInfo.now();
 
 export default defineComponent({
   name: 'Home',
-  components: { SemesterComponent, FocusComponent, BeautifulProgressIndicator, ToastNotification, ModuleSearch },
+  components: { SemesterComponent, FocusComponent,  ToastNotification, Categories },
   data() {
     return {
       startSemester: undefined as SemesterInfo | undefined,
