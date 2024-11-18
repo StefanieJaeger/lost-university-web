@@ -77,6 +77,11 @@
                 :color="category.color"
               />
             </td>
+            <td>
+              <div class="w-16">
+                <ModuleSearch :modules="category.modules" :showNextPossibleSemester="true" :widthClass="{'w-16': true}" @on-module-selected="(name: string) => addModule(name)"></ModuleSearch>
+              </div>
+            </td>
           </tr>
           <tr>
             <td class="align-bottom pr-4 text-end">
@@ -130,6 +135,7 @@ import {getColorForCategoryId} from '../helpers/color-helper';
 import {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
 import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
+import ModuleSearch from '../components/ModuleSearch.vue';
 
 const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
@@ -140,7 +146,7 @@ const currentSemester = SemesterInfo.now();
 
 export default defineComponent({
   name: 'Home',
-  components: { SemesterComponent, FocusComponent, BeautifulProgressIndicator, ToastNotification },
+  components: { SemesterComponent, FocusComponent, BeautifulProgressIndicator, ToastNotification, ModuleSearch },
   data() {
     return {
       startSemester: undefined as SemesterInfo | undefined,
@@ -161,6 +167,7 @@ export default defineComponent({
         plannedCredits: this.getPlannedCredits(category),
         color: getColorForCategoryId(category.id),
         ...category,
+        modules: category.modules.map(module => this.modules.find(m => m.id === module.id)).filter(f => f)
       }));
     },
     plannedModules() {
