@@ -38,28 +38,6 @@
       +
     </button>
   </div>
-  <!-- <div class="flex space-x-2 h-16 text-black">
-    <div class="h-full block bg-rose-200">Kat 1</div>
-    <div class="h-full block bg-violet-200">Kat 2</div>
-    <div class="h-full block bg-blue-200">Kat 3</div>
-    <div class="h-full block bg-green-200">Kat 4</div>
-    <div class="h-full block bg-yellow-200">Kat 5</div>
-    <div class="h-full block bg-orange-200">Kat 6</div>
-    <div class="h-full block bg-slate-200">Kat 7 (selten)</div>
-    <div class="h-full block bg-lime-200">Kat 8 (seltener)</div>
-    <div class="h-full block bg-red-500">Fehler</div>
-  </div>
-  <div class="flex space-x-2 h-16 text-white">
-    <div class="h-full block bg-rose-400">Kat 1</div>
-    <div class="h-full block bg-violet-400">Kat 2</div>
-    <div class="h-full block bg-blue-400">Kat 3</div>
-    <div class="h-full block bg-green-400">Kat 4</div>
-    <div class="h-full block bg-yellow-400">Kat 5</div>
-    <div class="h-full block bg-orange-400">Kat 6</div>
-    <div class="h-full block bg-slate-400">Kat 7 (selten)</div>
-    <div class="h-full block bg-lime-400">Kat 8 (seltener)</div>
-    <div class="h-full block bg-red-700">Fehler</div>
-  </div> -->
   <div class="my-16 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 justify-items-center gap-y-16">
     <article class="mx-4">
       <span class="text-xl">
