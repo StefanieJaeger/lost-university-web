@@ -60,7 +60,11 @@
             {{ semester.toString() }}
           </option>
         </select>
-        <a class="ml-3 underline" target="_blank" :href="studienOrdnungToUrlMap[studienordnung]">Studienordnung</a>
+        <a
+          class="ml-3 underline"
+          target="_blank"
+          :href="studienOrdnungToUrlMap[studienordnung]"
+        >Studienordnung</a>
       </div>
       <table>
         <tbody>
