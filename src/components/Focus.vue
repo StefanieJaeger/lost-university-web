@@ -35,6 +35,7 @@
       <li
         v-for="module in availableModulesForFocus"
         :key="module.id"
+        class="h-8 place-content-center"
       >
         <a
           class="hover:underline"
@@ -44,7 +45,7 @@
         </a>
         <button
           v-if="!!module.nextPossibleSemester"
-          class="bg-gray-800 text-white mx-3 p-1 rounded"
+          class="bg-gray-800 text-white text-xs mx-2 px-2 py-1 rounded"
           type="button"
           @click="$emit('on-add-module-to-next-sem', module.name)"
         >+ {{ module.nextPossibleSemester.toString() }}</button>
