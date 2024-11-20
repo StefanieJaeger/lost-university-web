@@ -38,6 +38,28 @@
       +
     </button>
   </div>
+  <!-- <div class="flex space-x-2 h-16 text-black">
+    <div class="h-full block bg-rose-200">Kat 1</div>
+    <div class="h-full block bg-violet-200">Kat 2</div>
+    <div class="h-full block bg-blue-200">Kat 3</div>
+    <div class="h-full block bg-green-200">Kat 4</div>
+    <div class="h-full block bg-yellow-200">Kat 5</div>
+    <div class="h-full block bg-orange-200">Kat 6</div>
+    <div class="h-full block bg-slate-200">Kat 7 (selten)</div>
+    <div class="h-full block bg-lime-200">Kat 8 (seltener)</div>
+    <div class="h-full block bg-red-500">Fehler</div>
+  </div>
+  <div class="flex space-x-2 h-16 text-white">
+    <div class="h-full block bg-rose-400">Kat 1</div>
+    <div class="h-full block bg-violet-400">Kat 2</div>
+    <div class="h-full block bg-blue-400">Kat 3</div>
+    <div class="h-full block bg-green-400">Kat 4</div>
+    <div class="h-full block bg-yellow-400">Kat 5</div>
+    <div class="h-full block bg-orange-400">Kat 6</div>
+    <div class="h-full block bg-slate-400">Kat 7 (selten)</div>
+    <div class="h-full block bg-lime-400">Kat 8 (seltener)</div>
+    <div class="h-full block bg-red-700">Fehler</div>
+  </div> -->
   <div class="my-16 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 justify-items-center gap-y-16">
     <article class="mx-4">
       <span class="text-xl">
@@ -75,7 +97,7 @@
                 :required="category.required_ects"
                 :earned="category.earnedCredits"
                 :planned="category.plannedCredits"
-                :color="category.color"
+                :color-class="category.colorClass"
               />
             </td>
           </tr>
@@ -88,7 +110,7 @@
                 :required="180"
                 :earned="totalEarnedEcts"
                 :planned="totalPlannedEcts"
-                :color="`orange`"
+                :color-class="'bg-amber-600'"
               />
             </td>
           </tr>
@@ -127,7 +149,7 @@ import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
 import BeautifulProgressIndicator from '../components/BeautifulProgressIndicator.vue';
 import ToastNotification from '../components/ToastNotification.vue';
-import {getColorForCategoryId} from '../helpers/color-helper';
+import {getColorClassForCategoryId} from '../helpers/color-helper';
 import type {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
 import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
@@ -177,7 +199,7 @@ export default defineComponent({
       return this.categories.map((category) => ({
         earnedCredits: this.getEarnedCredits(category),
         plannedCredits: this.getPlannedCredits(category),
-        color: getColorForCategoryId(category.id),
+        colorClass: getColorClassForCategoryId(category.id),
         ...category,
       }));
     },
@@ -239,9 +261,7 @@ export default defineComponent({
   },
   methods: {
     sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
-    getColorForCategoryId(categoryId: string): string {
-      return getColorForCategoryId(categoryId);
-    },
+    getColorClassForCategoryId,
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
       return response.json();
