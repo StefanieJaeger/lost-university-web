@@ -13,7 +13,7 @@
             :required="category.requiredEcts"
             :earned="category.earnedCredits"
             :planned="category.plannedCredits"
-            :color="category.color"
+            :color-class="category.colorClass"
           />
         </td>
         <td class="align-bottom pl-4">
@@ -36,7 +36,7 @@
             :required="180"
             :earned="totalEarnedEcts"
             :planned="totalPlannedEcts"
-            :color="`orange`"
+            :color-class="'bg-amber-600'"
           />
         </td>
       </tr>

@@ -59,6 +59,11 @@
             {{ semester.toString() }}
           </option>
         </select>
+        <a
+          class="ml-3 underline"
+          target="_blank"
+          :href="studienOrdnungToUrlMap[studienordnung]"
+        >Studienordnung</a>
       </div>
       <Categories
         :categories="mappedCategories"
@@ -98,7 +103,7 @@ import {defineComponent} from 'vue';
 import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
 import ToastNotification from '../components/ToastNotification.vue';
-import {getColorForCategoryId} from '../helpers/color-helper';
+import {getColorClassForCategoryId} from '../helpers/color-helper';
 import {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
 import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
@@ -118,6 +123,10 @@ export default defineComponent({
     return {
       startSemester: undefined as SemesterInfo | undefined,
       studienordnung: '21' as '21' | '23',
+      studienOrdnungToUrlMap: {
+        '21': 'https://studien.ost.ch/allStudies/10191_I.html',
+        '23': 'https://studien.ost.ch/allStudies/10246_I.html'
+      },
       selectableStartSemesters: SemesterInfo.selectableStartSemesters,
       semesters: [] as Semester[],
       modules: [] as Module[],
@@ -132,7 +141,7 @@ export default defineComponent({
       return this.categories.map((category) => ({
         earnedCredits: this.getEarnedCredits(category),
         plannedCredits: this.getPlannedCredits(category),
-        color: getColorForCategoryId(category.id),
+        colorClass: getColorClassForCategoryId(category.id),
         ...category,
         modules: category.modules.map(module => this.modules.find(m => m.id === module.id)).filter(f => f)
       }));
@@ -199,9 +208,7 @@ export default defineComponent({
   },
   methods: {
     sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
-    getColorForCategoryId(categoryId: string): string {
-      return getColorForCategoryId(categoryId);
-    },
+    getColorClassForCategoryId,
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
       return (await response.json()).map(m =>
