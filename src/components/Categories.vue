@@ -19,7 +19,7 @@
         <td class="align-bottom pl-4">
           <div class="w-20">
             <ModuleSearch
-              :modules="category.modules"
+              :grouped-modules="[{ id: category.id, name: category.name, isOpen: true, modules: category.modules }]"
               :show-next-possible-semester="true"
               :width-class="{'w-10': true}"
               @on-module-selected="(name: string) => addModule(name)"
