@@ -5,8 +5,11 @@
       v-if="earned >= required"
       :icon="['fa', 'check']"
     />
-    <span v-if="earned < required" class="text-gray-400">
-    {{ toBePlanned }} zu planen
+    <span
+      v-if="earned < required"
+      class="text-gray-400"
+    >
+      {{ toBePlanned }} zu planen
     </span>
   </div>
 
