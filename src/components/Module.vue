@@ -43,15 +43,15 @@ export default defineComponent({
     },
   },
   emits: ['on-delete'],
-  methods: {
-    getCategoryColorClassForModule,
-  },
   computed: {
     computedClasses() {
       const classesObj = { };
       classesObj[this.getCategoryColorClassForModule(this.module)] = true;
       return classesObj;
     }
+  },
+  methods: {
+    getCategoryColorClassForModule,
   }
 });
 </script>
