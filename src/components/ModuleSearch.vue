@@ -1,18 +1,34 @@
 <template>
   <button
-      class="bg-gray-800 text-white p-1 rounded"
-      type="button"
-      :class="{ 'collapse h-0': isSearching, ...widthClass }"
-      @click="isSearching = true"
-    >
-      +
+    class="bg-gray-800 text-white p-1 rounded"
+    type="button"
+    :class="{ 'collapse h-0': isSearching, ...widthClass }"
+    @click="isSearching = true"
+  >
+    +
   </button>
   <div :class="{ 'collapse h-0': !isSearching }">
-    <select :id="'modules' + searchId" @change="selectModule($event)" class="w-full bg-pink-100">
-      <option value="" selected disabled>Choose</option>
-      <option v-for="selectableModule in modules" :key="selectableModule.name" :value="selectableModule.name">
+    <select
+      :id="'modules' + searchId"
+      class="w-full bg-pink-100"
+      @change="selectModule($event)"
+    >
+      <option
+        value=""
+        selected
+        disabled
+      >
+        Choose
+      </option>
+      <option
+        v-for="selectableModule in modules"
+        :key="selectableModule.name"
+        :value="selectableModule.name"
+      >
         {{ selectableModule.name }}
-        <span v-if="showNextPossibleSemester && selectableModule.nextPossibleSemester">({{selectableModule.nextPossibleSemester}})</span>
+        <span v-if="showNextPossibleSemester && selectableModule.nextPossibleSemester">
+          ({{ selectableModule.nextPossibleSemester }})
+        </span>
       </option>
     </select>
   </div>
@@ -34,7 +50,8 @@ export default defineComponent({
       required: true
     },
     widthClass: {
-      type: Object
+      type: Object,
+      required: true
     }
   },
   emits: ['on-module-selected'],

@@ -60,7 +60,12 @@
           </option>
         </select>
       </div>
-      <Categories :categories="mappedCategories" :totalEarnedEcts="totalEarnedEcts" :totalPlannedEcts="totalPlannedEcts" @on-add-module="addModule"></Categories>
+      <Categories
+        :categories="mappedCategories"
+        :total-earned-ects="totalEarnedEcts"
+        :total-planned-ects="totalPlannedEcts"
+        @on-add-module="addModule"
+      />
     </article>
     <article class="mx-4">
       <h2 class="text-xl">
@@ -199,7 +204,9 @@ export default defineComponent({
     },
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
-      return (await response.json()).map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, m.ects, m.term));
+      return (await response.json()).map(m =>
+        new Module(m.id, m.name, m.url, m.categories_for_coloring, m.ects, m.term)
+      );
     },
     async getCategories(): Promise<Category[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_CATEGORIES}`);

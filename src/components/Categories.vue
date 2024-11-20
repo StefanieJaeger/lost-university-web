@@ -18,7 +18,12 @@
         </td>
         <td class="align-bottom pl-4">
           <div class="w-20">
-            <ModuleSearch :modules="category.modules" :showNextPossibleSemester="true" :widthClass="{'w-10': true}" @on-module-selected="(name: string) => addModule(name)"></ModuleSearch>
+            <ModuleSearch
+              :modules="category.modules"
+              :show-next-possible-semester="true"
+              :width-class="{'w-10': true}"
+              @on-module-selected="(name: string) => addModule(name)"
+            />
           </div>
         </td>
       </tr>

@@ -52,7 +52,7 @@ export class Category {
     this.requiredEcts = requiredEcts;
     this.modules = modules;
   }
-};
+}
 
 export class Semester {
   number: number;
@@ -73,9 +73,9 @@ export class Semester {
 export class UnknownModule {
   id: string;
   semesterNumber: number;
-};
+}
 
 export class Contributor {
   name: string;
   githubHandle: string;
-};
+}

@@ -36,7 +36,12 @@
       />
     </template>
     <template #footer>
-      <ModuleSearch :modules="allModules" :showNextPossibleSemester="false" :widthClass="{'w-2/3': true}" @on-module-selected="(name: string) => addModule(name)"></ModuleSearch>
+      <ModuleSearch
+        :modules="allModules"
+        :show-next-possible-semester="false"
+        :width-class="{'w-2/3': true}"
+        @on-module-selected="(name: string) => addModule(name)"
+      />
       <div class="mt-auto p-2">
         <p>{{ getTotalEcts }} ECTS</p>
       </div>
