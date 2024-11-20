@@ -8,7 +8,7 @@
       +
   </button>
   <div :class="{ 'collapse h-0': !isSearching }">
-    <select :id="'modules' + searchId" @change="selectModule($event)" :class="widthClass">
+    <select :id="'modules' + searchId" @change="selectModule($event)" class="w-full bg-pink-100">
       <option value="" selected disabled>Choose</option>
       <option v-for="selectableModule in modules" :key="selectableModule.name" :value="selectableModule.name">
         {{ selectableModule.name }}

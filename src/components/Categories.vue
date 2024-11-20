@@ -16,9 +16,9 @@
             :color="category.color"
           />
         </td>
-        <td>
-          <div class="w-16">
-            <ModuleSearch :modules="category.modules" :showNextPossibleSemester="true" :widthClass="{'w-16': true}" @on-module-selected="(name: string) => addModule(name)"></ModuleSearch>
+        <td class="align-bottom pl-4">
+          <div class="w-20">
+            <ModuleSearch :modules="category.modules" :showNextPossibleSemester="true" :widthClass="{'w-10': true}" @on-module-selected="(name: string) => addModule(name)"></ModuleSearch>
           </div>
         </td>
       </tr>
