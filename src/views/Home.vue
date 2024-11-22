@@ -34,15 +34,18 @@
       :title="semester.name ?? `${semester.number}`"
       :number="semester.number"
       :all-modules="modules"
-      @on-module-deleted="(moduleId: string) => onModuleDeleted(semester.number, moduleId)"
+      @on-module-deleted="(moduleId: string) => removeModule(semester.number, moduleId)"
       @on-add-module="addModule"
       @on-remove-semester="removeSemester"
       @on-drop-end="updateUrlFragment"
     />
     <button
-      class="bg-gray-500 hover:bg-gray-800 transition-colors text-white w-8 px-2 rounded"
+      class="transition-colors text-white w-8 px-2 rounded"
+      :class="addingSemesterIsDisabled? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-800'"
       type="button"
       @click="addSemester"
+      :disabled="addingSemesterIsDisabled"
+      :title="addingSemesterIsDisabled ? 'Mehr als 14 Semester können an der OST nicht geplant werden, da sonst eine Exmatrikulation stattfindet' : ''"
     >
       +
     </button>
@@ -172,6 +175,9 @@ export default defineComponent({
     totalEarnedEcts() {
       return this.getEarnedCredits();
     },
+    addingSemesterIsDisabled() {
+      return this.semesters.length >= SemesterInfo.maxNumberOfAllowedSemesters;
+    },
   },
   watch: {
     $route: {
@@ -205,7 +211,7 @@ export default defineComponent({
       immediate: true,
     },
     validationEnabled: {
-      handler(validationEnabled) {
+      handler() {
         this.updateUrlFragment();
       }
     }
@@ -329,6 +335,7 @@ export default defineComponent({
     },
     addSemester() {
       this.semesters.push(new Semester(this.semesters.length + 1, []).setName(this.startSemester));
+      this.updateUrlFragment();
     },
     removeSemester(semesterNumber: number) {
       this.semesters = this.semesters.filter((semester) => semester.number !== semesterNumber);
@@ -350,9 +357,6 @@ export default defineComponent({
       this.unknownModules = [];
       this.updateUrlFragment();
     },
-    onModuleDeleted(semesterNumber: number, moduleId: string) {
-      this.removeModule(semesterNumber, moduleId);
-    }
   },
 });
 </script>
