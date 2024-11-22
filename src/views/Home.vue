@@ -1,4 +1,14 @@
 <template>
+  <div class="fixed top-2 right-2 z-40">
+    <SwitchGroup>
+      <div class="flex items-center">
+        <SwitchLabel class="mr-4">Validierung:</SwitchLabel>
+        <Switch v-model="validationEnabled" :class="validationEnabled ? 'bg-teal-900' : 'bg-teal-700'" class="relative inline-flex h-6 w-11 items-center rounded-full">
+          <span aria-hidden="true" :class="validationEnabled ? 'translate-x-9' : 'translate-x-0'" class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
+        </Switch>
+      </div>
+    </SwitchGroup>
+  </div>
   <div class="fixed top-2 right-2 z-50">
     <ToastNotification
       v-for="message in errorMessages"
@@ -100,9 +110,10 @@ import FocusComponent from '../components/Focus.vue';
 import ToastNotification from '../components/ToastNotification.vue';
 import {getColorForCategoryId} from '../helpers/color-helper';
 import {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
-import {parseQuery} from "vue-router";
 import {SemesterInfo} from "../helpers/semester-info";
 import Categories from '../components/Categories.vue';
+import { StorageHelper } from '../helpers/storage-helper';
+import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
 
 const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
@@ -113,12 +124,13 @@ const currentSemester = SemesterInfo.now();
 
 export default defineComponent({
   name: 'Home',
-  components: { SemesterComponent, FocusComponent,  ToastNotification, Categories },
+  components: { SemesterComponent, FocusComponent,  ToastNotification, Categories, Switch, SwitchGroup, SwitchLabel },
   data() {
     return {
       startSemester: undefined as SemesterInfo | undefined,
       studienordnung: '21' as '21' | '23',
       selectableStartSemesters: SemesterInfo.selectableStartSemesters,
+      validationEnabled: true as boolean,
       semesters: [] as Semester[],
       modules: [] as Module[],
       categories: [] as Category[],
@@ -164,12 +176,12 @@ export default defineComponent({
   watch: {
     $route: {
       handler() {
-        this.semesters = this.getPlanDataFromUrl();
+        this.getPlanDataFromUrl();
       },
     },
     startSemester: {
       handler (newStartSemester) {
-        this.updateUrlFragment()
+        this.updateUrlFragment();
 
         if (newStartSemester === undefined) {
           return
@@ -192,15 +204,35 @@ export default defineComponent({
       },
       immediate: true,
     },
+    validationEnabled: {
+      handler(validationEnabled) {
+        this.updateUrlFragment();
+      }
+    }
   },
   async mounted() {
     this.modules = await this.getModules();
-    this.semesters = this.getPlanDataFromUrl();
+    this.getPlanDataFromUrl();
   },
   methods: {
     sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
     getColorForCategoryId(categoryId: string): string {
       return getColorForCategoryId(categoryId);
+    },
+    getPlanDataFromUrl() {
+      [this.semesters, this.startSemester, this.validationEnabled] = StorageHelper.getDataFromUrlHash(
+          window.location.hash,
+          (moduleId, index) => {
+            const newModule = this.modules.find((module) => module.id === moduleId);
+            if (!newModule) {
+              this.showUnknownModulesError(index + 1, moduleId);
+            }
+            return newModule!;
+          }
+        );
+    },
+    updateUrlFragment() {
+      StorageHelper.updateUrlFragment(this.semesters, this.startSemester, this.validationEnabled);
     },
     async getModules(): Promise<Module[]> {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
@@ -215,100 +247,6 @@ export default defineComponent({
     async getFocuses(): Promise<Focus[]> {
       const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_FOCUSES}`);
       return response.ok ? (await response.json()).map((f: Focus) => new Focus(f.id, f.name, f.modules)) : [];
-    },
-    getPlanDataFromUrl(): Semester[] {
-      let path = window.location.hash;
-      const planIndicator = '#/plan/';
-      const moduleSeparator = '_';
-      const semesterSeparator = '-';
-      function isNullOrWhitespace(input: string) {
-        return !input || !input.trim();
-      }
-
-      if (!path.startsWith(planIndicator)) {
-        const cachedPlan = localStorage.getItem('plan');
-        if (cachedPlan) {
-          window.location.hash = cachedPlan;
-          path = cachedPlan;
-        }
-      }
-
-      if (path.startsWith(planIndicator)) {
-        // This ensures backwards compatability. Removing it after everyone who started before 2022
-        // has finished their studies, so about 2026, is guaranteed to be fine.
-        const newPath = path
-          .replace('BuPro', 'WI2')
-          .replace('RheKI', 'RheKoI')
-          .replace('SDW', 'IBN')
-          .replace('FunProg', 'FP')
-          .replace('BAI14', 'BAI21')
-          .replace('SE1', 'SEP1')
-          .replace('SE2', 'SEP2')
-          .replace('NISec', 'NIoSec')
-          .replace('PFSec', 'PlFSec')
-          .replace('WIoT', 'WsoT');
-
-        const [ hash, query ] = newPath.split('?');
-
-        let newStartSemester = undefined;
-
-        if (query != undefined) {
-          const queryParameters = parseQuery(query);
-          const startSemesterQueryParameter = queryParameters["startSemester"];
-
-          if (typeof startSemesterQueryParameter === 'string') {
-            newStartSemester = SemesterInfo.parse(startSemesterQueryParameter) ?? undefined;
-          }
-        }
-
-        this.startSemester = newStartSemester;
-
-        const planData = hash
-          .slice(planIndicator.length)
-          .split(semesterSeparator)
-          .map((semesterPart, index) =>
-          new Semester(index + 1, semesterPart
-              .split(moduleSeparator)
-              .filter((id) => !(isNullOrWhitespace(id)))
-              .map((moduleId) => {
-                const newModule = this.modules.find((module) => module.id === moduleId);
-                if (!newModule) {
-                  this.showUnknownModulesError(index + 1, moduleId);
-                }
-                return newModule!;
-              })
-              .filter((module) => module))
-              .setName(this.startSemester)
-          );
-
-        if (newPath !== path) {
-          window.location.hash = newPath;
-        }
-
-        this.savePlanInLocalStorage(newPath);
-
-        return planData;
-      }
-
-      return [];
-    },
-    updateUrlFragment() {
-      let encodedPlan = this.semesters
-        .map((semester) => semester.modules.map((module) => module.id).join('_'))
-        .join('-');
-
-      if (this.startSemester !== undefined) {
-        encodedPlan += `?startSemester=${this.startSemester.toString()}`
-      }
-
-      window.location.hash = `/plan/${encodedPlan}`;
-
-      if (encodedPlan) {
-        this.savePlanInLocalStorage(window.location.hash);
-      }
-    },
-    savePlanInLocalStorage(path: string) {
-      localStorage.setItem('plan', path);
     },
     getPlannedSemesterForModule(moduleName: string): number | undefined {
       return this.semesters.find(
@@ -414,7 +352,7 @@ export default defineComponent({
     },
     onModuleDeleted(semesterNumber: number, moduleId: string) {
       this.removeModule(semesterNumber, moduleId);
-    },
+    }
   },
 });
 </script>
