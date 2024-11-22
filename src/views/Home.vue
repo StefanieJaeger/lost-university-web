@@ -4,7 +4,7 @@
       <div class="flex items-center">
         <SwitchLabel class="mr-4">Validierung:</SwitchLabel>
         <Switch v-model="validationEnabled" :class="validationEnabled ? 'bg-teal-900' : 'bg-teal-700'" class="relative inline-flex h-6 w-11 items-center rounded-full">
-          <span aria-hidden="true" :class="validationEnabled ? 'translate-x-9' : 'translate-x-0'" class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
+          <span aria-hidden="true" :class="validationEnabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
         </Switch>
       </div>
     </SwitchGroup>
