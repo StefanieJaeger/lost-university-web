@@ -31,8 +31,7 @@
       :key="semester.number"
       v-model:modules="semester.modules"
       class="bg-gray-200 rounded p-2 group/semester w-64 min-w-64"
-      :title="semester.name ?? `${semester.number}`"
-      :number="semester.number"
+      :semester="semester"
       :all-modules="modules"
       @on-module-deleted="(moduleId: string) => removeModule(semester.number, moduleId)"
       @on-add-module="addModule"
@@ -117,6 +116,7 @@ import {SemesterInfo} from "../helpers/semester-info";
 import Categories from '../components/Categories.vue';
 import { StorageHelper } from '../helpers/storage-helper';
 import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
+import { ValidationHelper } from '../helpers/validation-helper';
 
 const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
@@ -236,6 +236,9 @@ export default defineComponent({
             return newModule!;
           }
         );
+        // this is triggered on every change
+        // so we could validate all modules, save result in them
+      this.modules.forEach(module => ValidationHelper.setValidationInfoForModule(module, this.semesters));
     },
     updateUrlFragment() {
       StorageHelper.updateUrlFragment(this.semesters, this.startSemester, this.validationEnabled);

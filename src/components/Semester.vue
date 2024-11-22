@@ -13,7 +13,7 @@
     <template #header>
       <div class="flex justify-between w-full py-0.5 px-1">
         <span class="text-xl">
-          Semester {{ title }}
+          Semester {{ semester.name ?? `${semester.number}` }}
         </span>
         <button
           class="opacity-0 touch-only:opacity-25 group-hover/semester:opacity-25 hover:!opacity-75
@@ -31,7 +31,7 @@
     <template #item="{ element }">
       <ModuleComponent
         :module="element"
-        :semester-number="number"
+        :semester="semester"
         @on-delete="$emit('on-module-deleted', $event)"
       />
     </template>
@@ -52,8 +52,8 @@
 <script lang="ts">
 import draggable from 'vuedraggable';
 import ModuleComponent from './Module.vue';
-import { defineComponent } from 'vue';
-import type { Module } from '../helpers/types';
+import { type PropType, defineComponent } from 'vue';
+import type { Module, Semester } from '../helpers/types';
 import ModuleSearch from './ModuleSearch.vue';
 
 export default defineComponent({
@@ -64,13 +64,9 @@ export default defineComponent({
     ModuleSearch,
   },
   props: {
-    title: {
-      type: String,
-      required: true,
-    },
-    number: {
-      type: Number,
-      required: true,
+    semester: {
+      type: Object as PropType<Semester>,
+      required: true
     },
     modules: {
       type: Array<Module>,
@@ -89,10 +85,10 @@ export default defineComponent({
   },
   methods: {
     addModule(name: string) {
-      this.$emit('on-add-module', name, this.number);
+      this.$emit('on-add-module', name, this.semester.number);
     },
     removeSemester() {
-      this.$emit('on-remove-semester', this.number);
+      this.$emit('on-remove-semester', this.semester.number);
     },
     countTotalEcts(): number {
       return this.modules.reduce((previousValue, module) => previousValue + module.ects, 0);

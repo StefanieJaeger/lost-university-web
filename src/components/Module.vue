@@ -4,6 +4,13 @@
     class="rounded group/module relative p-2 px-8 flex flex-col items-center text-center text-white w-full"
     :style="{ 'background-color': getCategoryColorForModule(module) }"
   >
+  <div class="absolute left-2">
+    <span v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'soft'">SOFT</span>
+    <span v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'hard'">HARD</span>
+    <span v-if="!module.moduleValidationInfo">NONE</span>
+    <!-- <font-awesome-icon v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'soft'" :icon="['fa', 'info-circle']"></font-awesome-icon>
+    <font-awesome-icon v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'hard'" :icon="['fa', 'exclamation-circle']"></font-awesome-icon> -->
+  </div>
     <button
       class="absolute opacity-0 touch-only:opacity-75 group-hover/module:opacity-75
              hover:!opacity-100 right-2 transition-opacity duration-75"
@@ -33,18 +40,19 @@ import type { Module } from '../helpers/types';
 export default defineComponent({
   name: 'Module',
   props: {
-    semesterNumber: {
-      type: Number,
-      required: true,
-    },
     module: {
       type: Object as PropType<Module>,
       required: true,
-    },
+    }
   },
   emits: ['on-delete'],
   methods: {
     getCategoryColorForModule,
   },
 });
+
+// depending on sem, different things are validated
+// so module should know nothing and just get stuff to display
+
+
 </script>

@@ -1,4 +1,5 @@
 import { SemesterInfo } from "./semester-info";
+import { type ModuleValidationInfo } from "./validation-helper";
 
 export type Term = 'FS' | 'HS';
 
@@ -9,9 +10,14 @@ export class Module {
   categoriesForColoring: string[];
   ects: number;
   term: Term;
+  successorModuleId: string | undefined;
+  predecessorModuleId: string | undefined;
+  recommendedModuleIds: string[];
+  dependentModuleIds: string[];
 
   // undefined means there cannot be a next semester for this module (reached max semesters)
   nextPossibleSemester: SemesterInfo | undefined;
+  validationInfo: ModuleValidationInfo;
 
   constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term) {
     this.id = id;
