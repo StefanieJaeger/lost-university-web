@@ -29,7 +29,6 @@
     <SemesterComponent
       v-for="semester in enrichedSemesters"
       :key="semester.number"
-      v-model:modules="semester.modules"
       class="bg-gray-200 rounded p-2 group/semester w-64 min-w-64"
       :semester="semester"
       :all-modules="modules"
@@ -167,11 +166,10 @@ export default defineComponent({
     },
     sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
     getPlanDataFromUrl() {
-      // todo: should we move this to store?
-      const [semesters, startSemester, validationEnabled] = StorageHelper.getDataFromUrlHash(window.location.hash);
-        store.commit('setValidationEnabled', validationEnabled);
-        store.commit('setSemesters', semesters);
-        store.dispatch('setStartSemester', startSemester).then(_ => this.updateUrlFragment());
+      const [semesters, startSemester, validationEnabled] = StorageHelper.getDataFromUrlHash(window.location.hash, (semesterNumber: number, moduleId: string) => this.showUnknownModulesError(semesterNumber, moduleId));
+      store.commit('setValidationEnabled', validationEnabled);
+      store.commit('setSemesters', semesters);
+      store.dispatch('setStartSemester', startSemester).then(_ => this.updateUrlFragment());
     },
     updateUrlFragment() {
       StorageHelper.updateUrlFragment(this.enrichedSemesters, this.startSemester, this.validationEnabled);
@@ -233,29 +231,32 @@ export default defineComponent({
 
       if(!semesterNumber) {
         if(!module.nextPossibleSemester) {
-            this.showErrorMsg(`Kein nächstmögliches Semester für Modul ${moduleName} gefunden`);
-            return;
+          this.showErrorMsg(`Kein nächstmögliches Semester für Modul ${moduleName} gefunden`);
+          return;
         }
-        let nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString());
+        let nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString())
+        // todo: detect, when we have reached 14 (max) and stop!
         while(!nextSemester) {
           this.addSemester();
           nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString());
         }
-        nextSemester.modules.push(module);
-      } else {
-        this.enrichedSemesters[semesterNumber - 1].modules.push(module);
+        semesterNumber = nextSemester.number;
       }
 
+      store.commit('addModuleToSemester', {semesterNumber, moduleId: module.id});
       this.updateUrlFragment();
     },
     removeModule(semesterNumber: number, moduleId: string) {
-      this.enrichedSemesters[semesterNumber - 1].modules = this.enrichedSemesters[semesterNumber - 1].modules
-        .filter((module) => module.id !== moduleId);
+      store.commit('removeModuleFromSemester', { semesterNumber, moduleId });
       this.unknownModules = this.unknownModules.filter((f) => f.id !== moduleId);
-
       this.updateUrlFragment();
     },
     addSemester() {
+      // todo: validate, that not more than 14!!
+      if(this.addingSemesterIsDisabled) {
+        this.showErrorMsg(`Es können nicht mehr als ${SemesterInfo.maxNumberOfAllowedSemesters} Semester geplant werden!`);
+        return;
+      }
       store.commit('addSemester')
       this.updateUrlFragment();
     },

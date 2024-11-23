@@ -1,5 +1,5 @@
 import { SemesterInfo } from "./semester-info";
-import { type ModuleValidationInfo } from "./validation-helper";
+import { ValidationHelper, type ModuleValidationInfo } from "./validation-helper";
 
 export type Term = 'FS' | 'HS';
 
@@ -28,16 +28,19 @@ export class Module {
     this.term = term;
   }
 
-  calculateNextPossibleSemester(startSemester: SemesterInfo): Module {
+  calculateNextPossibleSemester(startSemester: SemesterInfo) {
     this.nextPossibleSemester = SemesterInfo.getNextPossibleSemesterForModule(this.term, startSemester);
-    return this;
+  }
+
+  validateModule(allSemesters: Semester[]) {
+    this.validationInfo = ValidationHelper.getValidationInfoForModule(this, allSemesters);
   }
 }
 
 export class Focus {
   id: string;
   name: string;
-  // modules: Module[];
+  modules: Module[];
   moduleIds: string[]
 
   constructor(id: string, name: string, moduleIds: string[]) {
@@ -51,7 +54,7 @@ export class Category {
   id: string;
   name: string;
   requiredEcts: number;
-  // modules: Module[];
+  modules: Module[];
   moduleIds: string[];
 
   constructor(id: string, name: string, requiredEcts: number, moduleIds: string[]) {
@@ -65,7 +68,7 @@ export class Category {
 export class Semester {
   number: number;
   name: string | undefined;
-  // modules: Module[];
+  modules: Module[];
   moduleIds: string[]
 
   constructor(number: number, moduleIds: string[]) {

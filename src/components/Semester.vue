@@ -1,8 +1,7 @@
 <template>
-  <!-- eslint-disable-next-line vue/no-mutating-props -->
   <draggable
     class="gap-y-1 flex flex-col items-center"
-    :list="modules"
+    :list="semester.modules"
     group="semester"
     item-key="id"
     :animation="200"
@@ -68,10 +67,6 @@ export default defineComponent({
       type: Object as PropType<Semester>,
       required: true
     },
-    modules: {
-      type: Array<Module>,
-      required: true,
-    },
     allModules: {
       type: Array<Module>,
       required: true,
@@ -91,7 +86,7 @@ export default defineComponent({
       this.$emit('on-remove-semester', this.semester.number);
     },
     countTotalEcts(): number {
-      return this.modules.reduce((previousValue, module) => previousValue + module.ects, 0);
+      return this.semester.modules.reduce((previousValue, module) => previousValue + module.ects, 0);
     },
     onDropEnd() {
       this.$emit('on-drop-end');

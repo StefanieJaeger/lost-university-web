@@ -3,67 +3,65 @@ import { SemesterInfo } from './semester-info';
 
 export type ModuleValidationInfo = {
   type: 'soft' | 'hard';
-  text: string;
+  tooltip: string; // shown on module
+  text?: string; // shown in global alert
+  action?: () => void; // action in global alert (unsure if this works)
 }
 
 export class ValidationHelper {
-  static setValidationInfoForModule(module: Module, semesters: Semester[]) {
-    const semesterForModule = semesters.find(s => s.modules.some(m => m.id === module.id));
+  static getValidationInfoForModule(module: Module, allSemesters: Semester[]): ModuleValidationInfo | null {
+    // todo: if module is duplicate, this will get first occurence. Could this cause problems?
+    const semesterForModule = allSemesters.find(s => s.modules.some(m => m.id === module.id));
     if(!semesterForModule) {
       // module is not planned, does not need validation right now
       return;
     }
     const semesterInfoForModule = SemesterInfo.parse(semesterForModule.name);
-    const allPlannedModules = semesters.reduce((modules, sem) => [...modules, sem.modules], []); // make distinct?
-    module.validationInfo = this.getValidationInfoForModule(module, allPlannedModules, semesterInfoForModule);
-  }
+    const allPlannedModules = allSemesters.reduce((modules, sem) => [...modules, sem.modules], []); // make distinct?
 
-  private static getValidationInfoForModule(module: Module, allPlannedModules: Module[], semesterInfo: SemesterInfo): ModuleValidationInfo {
-
-  // }
-  // static getValidationInfoForModule(module: Module, plannedModules: Module[], allModules: Module[], semesterInfo: SemesterInfo): ModuleValidationInfo | null {
-    if(this.isSemesterInThePast(semesterInfo)) {
-      if(this.isModuleInWrongSemester(module, semesterInfo)) {
-        return {type: 'soft', text: `${module.name} findet nur im ${module.term} statt`};
+    if(this.isSemesterInThePast(semesterInfoForModule)) {
+      console.log('past', module.id, module);
+      if(this.isModuleInWrongSemester(module, semesterInfoForModule)) {
+        return {type: 'soft', tooltip: `${module.name} findet nur im ${module.term} statt`};
       }
       if(this.isModuleAlreadyInPlan(module.id, allPlannedModules)) {
         // todo: reference semester
         // todo: give option to remove
-        return {type: 'hard', text: `Modul bereits geplant`};
+        return {type: 'hard', tooltip: `Modul bereits geplant`};
       }
       if(this.isModuleInactive(module)) {
         // const successor = allModules.find(m => m.id === module.successorModuleId);
         if(module.successorModuleId) {
           // todo: give option to replace
-          return {type: 'soft', text: `Modul hat Nachfolger ${module.successorModuleId}`};
+          return {type: 'soft', tooltip: `Modul hat Nachfolger ${module.successorModuleId}`};
         }
       }
       return null;
     }
 
-    if(this.isModuleInWrongSemester(module, semesterInfo)) {
-      return {type: 'hard', text: `${module.name} findet nur im ${module.term} statt`};
+    if(this.isModuleInWrongSemester(module, semesterInfoForModule)) {
+      return {type: 'hard', tooltip: `${module.name} findet nur im ${module.term} statt`};
     }
     if(this.isModuleAlreadyInPlan(module.id, allPlannedModules)) {
       // todo: reference semester
       // todo: give option to remove
-      return {type: 'hard', text: `Modul bereits geplant`}
+      return {type: 'hard', tooltip: `Modul bereits geplant`}
     }
     if(this.isModuleInactive(module)) {
       // todo: reference semester
-      return {type: 'hard', text: `Module ${module.name} wird nicht mehr angeboten`};
+      return {type: 'hard', tooltip: `Module ${module.name} wird nicht mehr angeboten`};
     }
-    if(this.isModuleBeforeRecommendedModules(module)) {
-      return {type: 'soft', text: `Empfohlene Module ${module.recommendedModuleIds.join(',')}`};
+    if(this.isModuleBeforeRecommendedModules(module, semesterInfoForModule, allSemesters)) {
+      return {type: 'soft', tooltip: `Empfohlene Module ${module.recommendedModuleIds.join(',')}`};
     }
   }
 
   private static isSemesterInThePast(semesterInfo: SemesterInfo) {
-    return semesterInfo.difference(SemesterInfo.now()) > 0
+    return semesterInfo.difference(SemesterInfo.now()) < 0
   }
 
 private static isModuleInWrongSemester(module: Module, semesterInfo: SemesterInfo): boolean {
-  return semesterInfo.isSpringSemester && module.term === 'FS';
+  return module.term === 'HS' ? semesterInfo.isSpringSemester : !semesterInfo.isSpringSemester;
 }
 
 private static isModuleAlreadyInPlan(moduleId: string, plannedModules: Module[]): boolean {
@@ -72,10 +70,13 @@ private static isModuleAlreadyInPlan(moduleId: string, plannedModules: Module[])
 
 private static isModuleInactive(module: Module): boolean {
   // todo: logic
+  // MGE -> inactive without successor
+  // PF -> inactive with successor
+  // todo: is there active with successor?
 return false;
 }
 
-private static isModuleBeforeRecommendedModules(module: Module): boolean {
+private static isModuleBeforeRecommendedModules(module: Module, semesterInfoForModule: SemesterInfo, allSemesters: Semester[]): boolean {
   // todo: logic
   return false;
 }

@@ -1,6 +1,7 @@
 import {parseQuery} from "vue-router";
 import { SemesterInfo } from "./semester-info";
 import { Semester } from "./types";
+import { store } from "./store";
 
 export class StorageHelper {
   private static readonly LOCALSTORAGE_PLAN_KEY = 'plan';
@@ -10,6 +11,7 @@ export class StorageHelper {
   private static readonly URL_START_SEMESTER_KEY = 'startSemester';
   private static readonly URL_VALIDATION_ENABLED_KEY = 'validation';
 
+  // todo: write short explaination, what these modules are!
   private static readonly MODULE_REPLACEMENT_MAP: {[key: string]: string} = {
     'BuPro': 'WI2',
     'RheKI': 'RheKoI',
@@ -23,7 +25,7 @@ export class StorageHelper {
     'WIoT': 'WsoT',
   }
 
-  static getDataFromUrlHash(urlHash: string): [Semester[], SemesterInfo, boolean] {
+  static getDataFromUrlHash(urlHash: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): [Semester[], SemesterInfo, boolean] {
       const planIndicator = `#/${this.URL_PLAN_KEY}/`;
 
       if (!urlHash.startsWith(planIndicator)) {
@@ -55,24 +57,11 @@ export class StorageHelper {
           validation = validationQueryParameter === 'false' ? false : true;
         }
 
-        // todo: validate, that all modules exist! else, show error
-        // (moduleId, index) => {
-        //   // todo: is it important, that we keep ref here?
-        //   const newModule = this.modules.find((module) => module.id === moduleId);
-        //   if (!newModule) {
-        //     this.showUnknownModulesError(index + 1, moduleId);
-        //   }
-        //   return newModule!;
-        // }
-
         const planData = hash
           .slice(planIndicator.length)
           .split(this.URL_SEMESTER_SEPARATOR)
           .map((semesterPart, index) =>
-          new Semester(index + 1, semesterPart
-              .split(this.URL_MODULE_SEPARATOR)
-              .filter((id) => !(this.isNullOrWhitespace(id))))
-            .setName(newStartSemester)
+            new Semester(index + 1, this.getModuleIdsFromSemesterPart(semesterPart, unknownModuleCallback)).setName(newStartSemester)
           );
 
         if (cleanedHash !== urlHash) {
@@ -116,5 +105,19 @@ export class StorageHelper {
 
   private static isNullOrWhitespace(input: string) {
     return !input || !input.trim();
+  }
+
+  private static getModuleIdsFromSemesterPart(semesterPart: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): string[] {
+    const moduleIds = semesterPart
+      .split(this.URL_MODULE_SEPARATOR)
+      .filter(moduleId => !(this.isNullOrWhitespace(moduleId)));
+
+    moduleIds.forEach((moduleId, index) => {
+      if(!store.getters.modules.find(m => m.id === moduleId)) {
+        unknownModuleCallback?.(index + 1, moduleId);
+      }
+    });
+
+    return moduleIds;
   }
 }

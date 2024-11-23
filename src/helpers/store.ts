@@ -85,21 +85,20 @@ export const store = createStore({
     removeSemester(state, semesterNumber: number) {
       state.semesters.splice(state.semesters.findIndex(f => f.number === semesterNumber), 1);
     },
+    removeModuleFromSemester(state, data: {semesterNumber: number, moduleId: string}) {
+      const semester = state.semesters.find(s => s.number === data.semesterNumber);
+      const index = semester.moduleIds.findIndex(moduleId => moduleId === data.moduleId);
+      semester.moduleIds.splice(index, 1);
+    },
+    addModuleToSemester(state, data: {semesterNumber: number, moduleId: string}) {
+      state.semesters.find(s => s.number === data.semesterNumber).moduleIds.push(data.moduleId);
+    },
     updateNameOfAllSemesters(state) {
       state.semesters.forEach(s => s.setName(state.startSemester));
     },
     updateNextPossibleSemesterOfAllModules(state) {
       state.modules.forEach(m => m.calculateNextPossibleSemester(state.startSemester))
     },
-    updateValidationInfoOfAllModules(state) {
-      // todo
-    },
-    // updateModule(state, updatedModule: Module) {
-    //   const index = state.modules.findIndex((mod) => mod.id === updatedModule.id);
-    //   if (index !== -1) {
-    //     state.modules.splice(index, 1, new Module(updatedModule.id, updatedModule.name, updatedModule.url, updatedModule.categoriesForColoring, updatedModule.ects, updatedModule.term));
-    //   }
-    // },
   },
   actions: {
     async loadModules (context) {
@@ -123,22 +122,25 @@ export const store = createStore({
     async setStartSemester (context, startSemester: SemesterInfo) {
       context.commit('setStartSemester', startSemester);
 
-      const oldStudienordnung = context.getters.studienordnung;
       if(startSemester?.year > 2023 || (startSemester?.year === 2023 && !startSemester?.isSpringSemester)) {
         context.commit('setStudienordnung', '23');
       } else {
         context.commit('setStudienordnung', '21');
       }
 
-      if(oldStudienordnung !== context.getters.studienordnung) {
-        await store.dispatch('loadCategories');
-        await store.dispatch('loadFocuses');
-      }
+      // todo: these are called, even if studienordnung stays the same...
+      await store.dispatch('loadCategories');
+      await store.dispatch('loadFocuses');
 
       context.commit('updateNameOfAllSemesters');
       context.commit('updateNextPossibleSemesterOfAllModules');
-      // todo: should we update validation? Since semester names might have changed...
-    }
+      store.dispatch('updateValidationInfoOfAllModules');
+    },
+    updateValidationInfoOfAllModules(context) {
+      if(context.getters.validationEnabled) {
+        context.getters.modules.forEach(module => module.validateModule(context.getters.enrichedSemesters));
+      }
+    },
   }
 });
 

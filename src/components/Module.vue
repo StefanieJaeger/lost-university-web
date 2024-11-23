@@ -5,11 +5,8 @@
     :style="{ 'background-color': getCategoryColorForModule(module) }"
   >
   <div class="absolute left-2">
-    <span v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'soft'">SOFT</span>
-    <span v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'hard'">HARD</span>
-    <span v-if="!module.moduleValidationInfo">NONE</span>
-    <!-- <font-awesome-icon v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'soft'" :icon="['fa', 'info-circle']"></font-awesome-icon>
-    <font-awesome-icon v-if="module.moduleValidationInfo && module.moduleValidationInfo.type === 'hard'" :icon="['fa', 'exclamation-circle']"></font-awesome-icon> -->
+    <font-awesome-icon v-if="module.validationInfo && module.validationInfo.type === 'soft'" :icon="['fa', 'info-circle']"></font-awesome-icon>
+    <font-awesome-icon v-if="module.validationInfo && module.validationInfo.type === 'hard'" :icon="['fa', 'circle-exclamation']"></font-awesome-icon>
   </div>
     <button
       class="absolute opacity-0 touch-only:opacity-75 group-hover/module:opacity-75
@@ -50,9 +47,4 @@ export default defineComponent({
     getCategoryColorForModule,
   },
 });
-
-// depending on sem, different things are validated
-// so module should know nothing and just get stuff to display
-
-
 </script>
