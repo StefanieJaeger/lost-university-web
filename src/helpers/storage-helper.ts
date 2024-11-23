@@ -1,6 +1,6 @@
 import {parseQuery} from "vue-router";
 import { SemesterInfo } from "./semester-info";
-import { Semester, Module } from "./types";
+import { Semester } from "./types";
 
 export class StorageHelper {
   private static readonly LOCALSTORAGE_PLAN_KEY = 'plan';
@@ -23,7 +23,7 @@ export class StorageHelper {
     'WIoT': 'WsoT',
   }
 
-  static getDataFromUrlHash(urlHash: string, getModuleById: (id: string, index: number) => Module): [Semester[], SemesterInfo, boolean] {
+  static getDataFromUrlHash(urlHash: string): [Semester[], SemesterInfo, boolean] {
       const planIndicator = `#/${this.URL_PLAN_KEY}/`;
 
       if (!urlHash.startsWith(planIndicator)) {
@@ -55,16 +55,24 @@ export class StorageHelper {
           validation = validationQueryParameter === 'false' ? false : true;
         }
 
+        // todo: validate, that all modules exist! else, show error
+        // (moduleId, index) => {
+        //   // todo: is it important, that we keep ref here?
+        //   const newModule = this.modules.find((module) => module.id === moduleId);
+        //   if (!newModule) {
+        //     this.showUnknownModulesError(index + 1, moduleId);
+        //   }
+        //   return newModule!;
+        // }
+
         const planData = hash
           .slice(planIndicator.length)
           .split(this.URL_SEMESTER_SEPARATOR)
           .map((semesterPart, index) =>
           new Semester(index + 1, semesterPart
               .split(this.URL_MODULE_SEPARATOR)
-              .filter((id) => !(this.isNullOrWhitespace(id)))
-              .map((moduleId) => getModuleById(moduleId, index))
-              .filter((module) => module))
-              .setName(newStartSemester)
+              .filter((id) => !(this.isNullOrWhitespace(id))))
+            .setName(newStartSemester)
           );
 
         if (cleanedHash !== urlHash) {

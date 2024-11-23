@@ -3,7 +3,7 @@
     <SwitchGroup>
       <div class="flex items-center">
         <SwitchLabel class="mr-4">Validierung:</SwitchLabel>
-        <Switch v-model="validationEnabled" :class="validationEnabled ? 'bg-teal-900' : 'bg-teal-700'" class="relative inline-flex h-6 w-11 items-center rounded-full">
+        <Switch :modelValue="validationEnabled" @update:modelValue="setValidationEnabled" :class="validationEnabled ? 'bg-teal-900' : 'bg-teal-700'" class="relative inline-flex h-6 w-11 items-center rounded-full">
           <span aria-hidden="true" :class="validationEnabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
         </Switch>
       </div>
@@ -27,7 +27,7 @@
   </div>
   <div class="flex space-x-2 overflow-auto before:m-auto after:m-auto p-4">
     <SemesterComponent
-      v-for="semester in semesters"
+      v-for="semester in enrichedSemesters"
       :key="semester.number"
       v-model:modules="semester.modules"
       class="bg-gray-200 rounded p-2 group/semester w-64 min-w-64"
@@ -60,7 +60,8 @@
         </label>
         <select
           id="last-semester-select"
-          v-model="startSemester"
+          :value="startSemester"
+          @change="setStartSemester($event.target.value)"
           class="ml-2 px-3 py-2 rounded"
         >
           <option
@@ -73,7 +74,7 @@
         </select>
       </div>
       <Categories
-        :categories="mappedCategories"
+        :categories="enrichedCategories"
         :total-earned-ects="totalEarnedEcts"
         :total-planned-ects="totalPlannedEcts"
         @on-add-module="addModule"
@@ -85,7 +86,7 @@
       </h2>
       <div class="mt-5">
         <div
-          v-for="focus in mappedFocuses"
+          v-for="focus in enrichedFocuses"
           :key="focus.name"
         >
           <FocusComponent
@@ -110,18 +111,13 @@ import {defineComponent} from 'vue';
 import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
 import ToastNotification from '../components/ToastNotification.vue';
-import {getColorForCategoryId} from '../helpers/color-helper';
-import {Category, Focus, Module, Semester, UnknownModule} from '../helpers/types';
+import {Category, Module, UnknownModule} from '../helpers/types';
 import {SemesterInfo} from "../helpers/semester-info";
 import Categories from '../components/Categories.vue';
 import { StorageHelper } from '../helpers/storage-helper';
 import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
-import { ValidationHelper } from '../helpers/validation-helper';
-
-const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
-const ROUTE_MODULES = '/modules.json';
-const ROUTE_CATEGORIES = '/categories.json';
-const ROUTE_FOCUSES = '/focuses.json';
+import { store } from '../helpers/store';
+import { mapGetters } from 'vuex'
 
 const currentSemester = SemesterInfo.now();
 
@@ -130,45 +126,13 @@ export default defineComponent({
   components: { SemesterComponent, FocusComponent,  ToastNotification, Categories, Switch, SwitchGroup, SwitchLabel },
   data() {
     return {
-      startSemester: undefined as SemesterInfo | undefined,
-      studienordnung: '21' as '21' | '23',
       selectableStartSemesters: SemesterInfo.selectableStartSemesters,
-      validationEnabled: true as boolean,
-      semesters: [] as Semester[],
-      modules: [] as Module[],
-      categories: [] as Category[],
-      focuses: [] as Focus[],
       errorMessages: [] as string[],
       unknownModules: [] as UnknownModule[],
     };
   },
   computed: {
-    mappedCategories() {
-      return this.categories.map((category) => ({
-        earnedCredits: this.getEarnedCredits(category),
-        plannedCredits: this.getPlannedCredits(category),
-        color: getColorForCategoryId(category.id),
-        ...category,
-        modules: category.modules.map(module => this.modules.find(m => m.id === module.id)).filter(f => f)
-      }));
-    },
-    plannedModules() {
-      return this.semesters
-        .flatMap((semester) => semester.modules);
-    },
-    mappedFocuses() {
-      const plannedModuleIds = this.plannedModules.map((module) => module.id);
-      const numberOfModulesRequiredToGetFocus = 8;
-      return this.focuses.map((focus) => ({
-        ...focus,
-        numberOfMissingModules: Math.max(0, numberOfModulesRequiredToGetFocus - focus.modules
-          .filter((module) => plannedModuleIds.includes(module.id))
-          .length),
-          availableModules: focus.modules
-          .filter((module) => !plannedModuleIds.includes(module.id))
-          .map((module) => this.modules.find(m => m.id === module.id))
-      }));
-    },
+    ...mapGetters(['modules', 'enrichedCategories', 'enrichedFocuses', 'enrichedSemesters', 'startSemester', 'studienordnung', 'validationEnabled']),
     totalPlannedEcts() {
       return this.getPlannedCredits();
     },
@@ -176,89 +140,44 @@ export default defineComponent({
       return this.getEarnedCredits();
     },
     addingSemesterIsDisabled() {
-      return this.semesters.length >= SemesterInfo.maxNumberOfAllowedSemesters;
+      return this.enrichedSemesters.length >= SemesterInfo.maxNumberOfAllowedSemesters;
     },
   },
   watch: {
     $route: {
       handler() {
-        this.getPlanDataFromUrl();
+        setTimeout(() => {
+          this.getPlanDataFromUrl();
+        }, 0);
       },
     },
-    startSemester: {
-      handler (newStartSemester) {
-        this.updateUrlFragment();
-
-        if (newStartSemester === undefined) {
-          return
-        }
-
-        if (newStartSemester.year > 2023 || (newStartSemester.year === 2023 && !newStartSemester.isSpringSemester)) {
-          this.studienordnung = '23';
-        } else {
-          this.studienordnung = '21';
-        }
-
-        this.semesters.forEach(s => s.setName(newStartSemester));
-        this.modules.forEach(m => m.calculateNextPossibleSemester(newStartSemester));
-      }
-    },
-    studienordnung: {
-      async handler() {
-        this.categories = await this.getCategories();
-        this.focuses = await this.getFocuses();
-      },
-      immediate: true,
-    },
-    validationEnabled: {
-      handler() {
-        this.updateUrlFragment();
-      }
-    }
   },
   async mounted() {
-    this.modules = await this.getModules();
+    await store.dispatch('loadModules');
     this.getPlanDataFromUrl();
   },
   methods: {
-    sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
-    getColorForCategoryId(categoryId: string): string {
-      return getColorForCategoryId(categoryId);
+    setStartSemester(startSemester: string) {
+      const newStartSemester = SemesterInfo.parse(startSemester);
+      store.dispatch('setStartSemester', newStartSemester).then(_ => this.updateUrlFragment());
     },
+    setValidationEnabled(validationEnabled: boolean) {
+      store.commit('setValidationEnabled', validationEnabled);
+      this.updateUrlFragment();
+    },
+    sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
     getPlanDataFromUrl() {
-      [this.semesters, this.startSemester, this.validationEnabled] = StorageHelper.getDataFromUrlHash(
-          window.location.hash,
-          (moduleId, index) => {
-            const newModule = this.modules.find((module) => module.id === moduleId);
-            if (!newModule) {
-              this.showUnknownModulesError(index + 1, moduleId);
-            }
-            return newModule!;
-          }
-        );
-        // this is triggered on every change
-        // so we could validate all modules, save result in them
-      this.modules.forEach(module => ValidationHelper.setValidationInfoForModule(module, this.semesters));
+      // todo: should we move this to store?
+      const [semesters, startSemester, validationEnabled] = StorageHelper.getDataFromUrlHash(window.location.hash);
+        store.commit('setValidationEnabled', validationEnabled);
+        store.commit('setSemesters', semesters);
+        store.dispatch('setStartSemester', startSemester).then(_ => this.updateUrlFragment());
     },
     updateUrlFragment() {
-      StorageHelper.updateUrlFragment(this.semesters, this.startSemester, this.validationEnabled);
-    },
-    async getModules(): Promise<Module[]> {
-      const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
-      return (await response.json()).map(m =>
-        new Module(m.id, m.name, m.url, m.categories_for_coloring, m.ects, m.term)
-      );
-    },
-    async getCategories(): Promise<Category[]> {
-      const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_CATEGORIES}`);
-      return (await response.json()).map(c => new Category(c.id, c.name, Number(c.required_ects), c.modules));
-    },
-    async getFocuses(): Promise<Focus[]> {
-      const response = await fetch(`${BASE_URL}${this.studienordnung}${ROUTE_FOCUSES}`);
-      return response.ok ? (await response.json()).map((f: Focus) => new Focus(f.id, f.name, f.modules)) : [];
+      StorageHelper.updateUrlFragment(this.enrichedSemesters, this.startSemester, this.validationEnabled);
     },
     getPlannedSemesterForModule(moduleName: string): number | undefined {
-      return this.semesters.find(
+      return this.enrichedSemesters.find(
         (semester) => semester.modules.some((module) => module.name === moduleName),
       )?.number;
     },
@@ -273,10 +192,10 @@ export default defineComponent({
         return 0;
       }
 
-      return this.semesters
+      return this.enrichedSemesters
         .slice(0, indexOfLastCompletedSemester)
         .flatMap((semester) => semester.modules)
-        .filter((module) => !category || category.modules.some((m) => m.id === module.id))
+        .filter((module) => !category || category.moduleIds.includes(module.id))
         .reduce(this.sumCredits, 0);
     },
     getPlannedCredits(category?: Category): number {
@@ -284,7 +203,7 @@ export default defineComponent({
         return 0;
       }
 
-      let semestersToConsider = this.semesters;
+      let semestersToConsider = this.enrichedSemesters;
       const indexOfLastCompletedSemester = currentSemester.difference(this.startSemester);
 
       if (indexOfLastCompletedSemester >= 0) {
@@ -293,7 +212,7 @@ export default defineComponent({
 
       return semestersToConsider
         .flatMap((semester) => semester.modules)
-        .filter((module) => !category || category.modules.some((m) => m.id === module.id))
+        .filter((module) => !category || category.moduleIds.includes(module.id))
         .reduce(this.sumCredits, 0);
     },
     addModule(moduleName: string, semesterNumber?: number) {
@@ -317,31 +236,31 @@ export default defineComponent({
             this.showErrorMsg(`Kein nächstmögliches Semester für Modul ${moduleName} gefunden`);
             return;
         }
-        let nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
+        let nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString());
         while(!nextSemester) {
           this.addSemester();
-          nextSemester = this.semesters.find(s => s.name === module.nextPossibleSemester.toString());
+          nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString());
         }
         nextSemester.modules.push(module);
       } else {
-        this.semesters[semesterNumber - 1].modules.push(module);
+        this.enrichedSemesters[semesterNumber - 1].modules.push(module);
       }
 
       this.updateUrlFragment();
     },
     removeModule(semesterNumber: number, moduleId: string) {
-      this.semesters[semesterNumber - 1].modules = this.semesters[semesterNumber - 1].modules
+      this.enrichedSemesters[semesterNumber - 1].modules = this.enrichedSemesters[semesterNumber - 1].modules
         .filter((module) => module.id !== moduleId);
       this.unknownModules = this.unknownModules.filter((f) => f.id !== moduleId);
 
       this.updateUrlFragment();
     },
     addSemester() {
-      this.semesters.push(new Semester(this.semesters.length + 1, []).setName(this.startSemester));
+      store.commit('addSemester')
       this.updateUrlFragment();
     },
     removeSemester(semesterNumber: number) {
-      this.semesters = this.semesters.filter((semester) => semester.number !== semesterNumber);
+      store.commit('removeSemester', semesterNumber);
       this.unknownModules = this.unknownModules.filter((f) => f.semesterNumber !== semesterNumber);
       this.updateUrlFragment();
     },

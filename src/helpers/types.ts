@@ -37,12 +37,13 @@ export class Module {
 export class Focus {
   id: string;
   name: string;
-  modules: Module[];
+  // modules: Module[];
+  moduleIds: string[]
 
-  constructor(id: string, name: string, modules: Module[]) {
+  constructor(id: string, name: string, moduleIds: string[]) {
     this.id = id;
     this.name = name;
-    this.modules = modules;
+    this.moduleIds = moduleIds;
   }
 }
 
@@ -50,24 +51,26 @@ export class Category {
   id: string;
   name: string;
   requiredEcts: number;
-  modules: Module[];
+  // modules: Module[];
+  moduleIds: string[];
 
-  constructor(id: string, name: string, requiredEcts: number, modules: Module[]) {
+  constructor(id: string, name: string, requiredEcts: number, moduleIds: string[]) {
     this.id = id;
     this.name = name;
     this.requiredEcts = requiredEcts;
-    this.modules = modules;
+    this.moduleIds = moduleIds;
   }
 }
 
 export class Semester {
   number: number;
   name: string | undefined;
-  modules: Module[];
+  // modules: Module[];
+  moduleIds: string[]
 
-  constructor(number: number, modules: Module[]) {
+  constructor(number: number, moduleIds: string[]) {
     this.number = number;
-    this.modules = modules;
+    this.moduleIds = moduleIds;
   }
 
   setName(startSemester: SemesterInfo | undefined): Semester {
