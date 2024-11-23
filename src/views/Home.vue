@@ -71,6 +71,11 @@
             {{ semester.toString() }}
           </option>
         </select>
+        <a
+          class="ml-3 underline"
+          target="_blank"
+          :href="studienOrdnungToUrlMap[studienordnung]"
+        >Studienordnung</a>
       </div>
       <Categories
         :categories="enrichedCategories"
@@ -126,6 +131,10 @@ export default defineComponent({
   data() {
     return {
       selectableStartSemesters: SemesterInfo.selectableStartSemesters,
+      studienOrdnungToUrlMap: {
+        '21': 'https://studien.ost.ch/allStudies/10191_I.html',
+        '23': 'https://studien.ost.ch/allStudies/10246_I.html'
+      },
       errorMessages: [] as string[],
       unknownModules: [] as UnknownModule[],
     };
@@ -169,7 +178,7 @@ export default defineComponent({
       const [semesters, startSemester, validationEnabled] = StorageHelper.getDataFromUrlHash(window.location.hash, (semesterNumber: number, moduleId: string) => this.showUnknownModulesError(semesterNumber, moduleId));
       store.commit('setValidationEnabled', validationEnabled);
       store.commit('setSemesters', semesters);
-      store.dispatch('setStartSemester', startSemester).then(_ => this.updateUrlFragment());
+      store.dispatch('setStartSemester', startSemester).then(() => this.updateUrlFragment());
     },
     updateUrlFragment() {
       StorageHelper.updateUrlFragment(this.enrichedSemesters, this.startSemester, this.validationEnabled);

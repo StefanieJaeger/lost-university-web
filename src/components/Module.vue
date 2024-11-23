@@ -2,7 +2,7 @@
   <div
     :key="module.name"
     class="rounded group/module relative p-2 px-8 flex flex-col items-center text-center text-white w-full"
-    :style="{ 'background-color': getCategoryColorForModule(module) }"
+    :class="computedClasses"
   >
   <div class="absolute left-2">
     <font-awesome-icon v-if="module.validationInfo && module.validationInfo.type === 'soft'" :icon="['fa', 'info-circle']"></font-awesome-icon>
@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { type PropType, defineComponent } from 'vue';
-import { getCategoryColorForModule } from '../helpers/color-helper';
+import { getCategoryColorClassForModule } from '../helpers/color-helper';
 import type { Module } from '../helpers/types';
 
 export default defineComponent({
@@ -43,8 +43,15 @@ export default defineComponent({
     }
   },
   emits: ['on-delete'],
-  methods: {
-    getCategoryColorForModule,
+  computed: {
+    computedClasses() {
+      const classesObj = { };
+      classesObj[this.getCategoryColorClassForModule(this.module)] = true;
+      return classesObj;
+    }
   },
+  methods: {
+    getCategoryColorClassForModule,
+  }
 });
 </script>

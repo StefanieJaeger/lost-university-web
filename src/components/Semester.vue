@@ -12,7 +12,7 @@
     <template #header>
       <div class="flex justify-between w-full py-0.5 px-1">
         <span class="text-xl">
-          Semester {{ semester.name ?? `${semester.number}` }}
+          {{ semester.number }}. Semester {{ semester.name }}
         </span>
         <button
           class="opacity-0 touch-only:opacity-25 group-hover/semester:opacity-25 hover:!opacity-75

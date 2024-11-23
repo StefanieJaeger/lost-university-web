@@ -14,10 +14,14 @@ export class ValidationHelper {
     const semesterForModule = allSemesters.find(s => s.modules.some(m => m.id === module.id));
     if(!semesterForModule) {
       // module is not planned, does not need validation right now
-      return;
+      return null;
     }
     const semesterInfoForModule = SemesterInfo.parse(semesterForModule.name);
-    const allPlannedModules = allSemesters.reduce((modules, sem) => [...modules, sem.modules], []); // make distinct?
+    const allPlannedModules = allSemesters.reduce((modules, sem) => [...modules, ...sem.modules], [] as Module[]); // make distinct?
+
+    if(semesterInfoForModule == null) {
+      return null;
+    }
 
     if(this.isSemesterInThePast(semesterInfoForModule)) {
       console.log('past', module.id, module);
@@ -54,6 +58,8 @@ export class ValidationHelper {
     if(this.isModuleBeforeRecommendedModules(module, semesterInfoForModule, allSemesters)) {
       return {type: 'soft', tooltip: `Empfohlene Module ${module.recommendedModuleIds.join(',')}`};
     }
+
+    return null;
   }
 
   private static isSemesterInThePast(semesterInfo: SemesterInfo) {

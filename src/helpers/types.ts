@@ -14,10 +14,10 @@ export class Module {
   predecessorModuleId: string | undefined;
   recommendedModuleIds: string[];
   dependentModuleIds: string[];
+  validationInfo: ModuleValidationInfo | null;
 
-  // undefined means there cannot be a next semester for this module (reached max semesters)
-  nextPossibleSemester: SemesterInfo | undefined;
-  validationInfo: ModuleValidationInfo;
+  // null means there cannot be a next semester for this module (reached max semesters)
+  nextPossibleSemester: SemesterInfo | null;
 
   constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term) {
     this.id = id;
@@ -26,6 +26,10 @@ export class Module {
     this.categoriesForColoring = categoriesForColoring;
     this.ects = ects;
     this.term = term;
+    this.validationInfo = null;
+    this.nextPossibleSemester = null;
+    this.recommendedModuleIds = [];
+    this.dependentModuleIds = [];
   }
 
   calculateNextPossibleSemester(startSemester: SemesterInfo) {
@@ -47,6 +51,7 @@ export class Focus {
     this.id = id;
     this.name = name;
     this.moduleIds = moduleIds;
+    this.modules = [];
   }
 }
 
@@ -54,6 +59,9 @@ export class Category {
   id: string;
   name: string;
   requiredEcts: number;
+  earnedCredits: number;
+  plannedCredits: number;
+  colorClass: string;
   modules: Module[];
   moduleIds: string[];
 
@@ -61,7 +69,11 @@ export class Category {
     this.id = id;
     this.name = name;
     this.requiredEcts = requiredEcts;
+    this.earnedCredits = 0;
+    this.plannedCredits = 0;
+    this.colorClass = '';
     this.moduleIds = moduleIds;
+    this.modules = [];
   }
 }
 
@@ -74,6 +86,7 @@ export class Semester {
   constructor(number: number, moduleIds: string[]) {
     this.number = number;
     this.moduleIds = moduleIds;
+    this.modules = [];
   }
 
   setName(startSemester: SemesterInfo | undefined): Semester {
@@ -83,11 +96,11 @@ export class Semester {
 }
 
 export class UnknownModule {
-  id: string;
-  semesterNumber: number;
+  id!: string;
+  semesterNumber!: number;
 }
 
 export class Contributor {
-  name: string;
-  githubHandle: string;
+  name!: string;
+  githubHandle!: string;
 }

@@ -4,7 +4,7 @@ import { createApp } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library, type IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import { faBars, faChevronDown, faChevronUp, faCircleXmark, faInfoCircle, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faChevronDown, faChevronUp, faCircleXmark, faCheck, faInfoCircle, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import App from './App.vue';
 import router from './router';
 import { store } from './helpers/store';
@@ -14,6 +14,7 @@ library.add(faChevronUp as IconDefinition);
 library.add(faChevronDown as IconDefinition);
 library.add(faGithub as IconDefinition);
 library.add(faCircleXmark as IconDefinition);
+library.add(faCheck as IconDefinition);
 library.add(faInfoCircle as IconDefinition);
 library.add(faCircleExclamation as IconDefinition);
 

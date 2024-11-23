@@ -1,7 +1,7 @@
 import { createStore } from 'vuex'
 import { Category, Focus, Module, Semester } from './types';
 import { SemesterInfo } from './semester-info';
-import {getColorForCategoryId} from '../helpers/color-helper';
+import {getColorClassForCategoryId} from '../helpers/color-helper';
 
 const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
@@ -33,7 +33,7 @@ export const store = createStore({
       return state.categories.map(category => ({
         earnedCredits: getEarnedCredits(category),
         plannedCredits: getPlannedCredits(category),
-        color: getColorForCategoryId(category.id),
+        colorClass: getColorClassForCategoryId(category.id),
         ...category,
         modules: getters.getModulesByIds(category.moduleIds),
       }));

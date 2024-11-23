@@ -48,8 +48,8 @@ export class SemesterInfo {
     return new SemesterInfo(false, isSpringSemester(now) ? now.getFullYear() : now.getFullYear() + 1);
   }
 
-  static parse(text: string) {
-    if (text.length !== 4) return null;
+  static parse(text: string | undefined) {
+    if (text?.length !== 4) return null;
 
     const prefix = text.substring(0, 2);
     const suffix = text.substring(2);
@@ -69,13 +69,13 @@ export class SemesterInfo {
     }
   }
 
-  static getNextPossibleSemesterForModule(term: 'FS' | 'HS', startSemester: SemesterInfo | undefined): SemesterInfo {
+  static getNextPossibleSemesterForModule(term: 'FS' | 'HS', startSemester: SemesterInfo | undefined): SemesterInfo | null {
     if(!startSemester) {
-      return undefined;
+      return null;
     }
     const next = term === 'FS' ? SemesterInfo.nextSpringSemester() : SemesterInfo.nextAutumSemester();
     if(next.difference(startSemester) >= SemesterInfo.maxNumberOfAllowedSemesters) {
-      return undefined;
+      return null;
     }
     return next;
   }
