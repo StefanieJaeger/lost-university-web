@@ -1,3 +1,5 @@
+import type { Term } from "./types";
+
 const isSpringSemester = (date: Date) => {
   const month = date.getMonth();
   return month > 1 && month < 8;
@@ -69,10 +71,11 @@ export class SemesterInfo {
     }
   }
 
-  static getNextPossibleSemesterForModule(term: 'FS' | 'HS', startSemester: SemesterInfo | undefined): SemesterInfo | null {
+  static getNextPossibleSemesterForModule(term: Term, startSemester: SemesterInfo | undefined): SemesterInfo | null {
     if(!startSemester) {
       return null;
     }
+    // todo: both and null!
     const next = term === 'FS' ? SemesterInfo.nextSpringSemester() : SemesterInfo.nextAutumSemester();
     if(next.difference(startSemester) >= SemesterInfo.maxNumberOfAllowedSemesters) {
       return null;

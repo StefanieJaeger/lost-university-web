@@ -1,7 +1,7 @@
 import { SemesterInfo } from "./semester-info";
 import { ValidationHelper, type ModuleValidationInfo } from "./validation-helper";
 
-export type Term = 'FS' | 'HS';
+export type Term = 'FS' | 'HS' | 'both' | undefined;
 
 export class Module {
   id: string;
@@ -9,6 +9,7 @@ export class Module {
   url: string;
   categoriesForColoring: string[];
   ects: number;
+  isDeactivated: boolean;
   term: Term;
   successorModuleId: string | undefined;
   predecessorModuleId: string | undefined;
@@ -19,13 +20,14 @@ export class Module {
   // null means there cannot be a next semester for this module (reached max semesters)
   nextPossibleSemester: SemesterInfo | null;
 
-  constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term) {
+  constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term, isDeactivated: boolean) {
     this.id = id;
     this.name = name;
     this.url = url;
     this.categoriesForColoring = categoriesForColoring;
     this.ects = ects;
     this.term = term;
+    this.isDeactivated = isDeactivated;
     this.validationInfo = null;
     this.nextPossibleSemester = null;
     this.recommendedModuleIds = [];
@@ -59,8 +61,8 @@ export class Category {
   id: string;
   name: string;
   requiredEcts: number;
-  earnedCredits: number;
-  plannedCredits: number;
+  earnedEcts: number;
+  plannedEcts: number;
   colorClass: string;
   modules: Module[];
   moduleIds: string[];
@@ -69,8 +71,8 @@ export class Category {
     this.id = id;
     this.name = name;
     this.requiredEcts = requiredEcts;
-    this.earnedCredits = 0;
-    this.plannedCredits = 0;
+    this.earnedEcts = 0;
+    this.plannedEcts = 0;
     this.colorClass = '';
     this.moduleIds = moduleIds;
     this.modules = [];

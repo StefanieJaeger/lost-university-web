@@ -1,7 +1,6 @@
 import {parseQuery} from "vue-router";
 import { SemesterInfo } from "./semester-info";
 import { Semester } from "./types";
-import { store } from "./store";
 
 export class StorageHelper {
   private static readonly LOCALSTORAGE_PLAN_KEY = 'plan';
@@ -25,7 +24,7 @@ export class StorageHelper {
     'WIoT': 'WsoT',
   }
 
-  static getDataFromUrlHash(urlHash: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): [Semester[], SemesterInfo, boolean] {
+  static getDataFromUrlHash(urlHash: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): [Semester[], SemesterInfo | undefined, boolean] {
       const planIndicator = `#/${this.URL_PLAN_KEY}/`;
 
       if (!urlHash.startsWith(planIndicator)) {
@@ -112,11 +111,12 @@ export class StorageHelper {
       .split(this.URL_MODULE_SEPARATOR)
       .filter(moduleId => !(this.isNullOrWhitespace(moduleId)));
 
-    moduleIds.forEach((moduleId, index) => {
-      if(!store.getters.modules.find(m => m.id === moduleId)) {
-        unknownModuleCallback?.(index + 1, moduleId);
-      }
-    });
+      // todo: validation is not needed
+    // moduleIds.forEach((moduleId, index) => {
+    //   if(!store.getters.modules.find(m => m.id === moduleId)) {
+    //     unknownModuleCallback?.(index + 1, moduleId);
+    //   }
+    // });
 
     return moduleIds;
   }

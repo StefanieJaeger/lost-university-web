@@ -10,33 +10,31 @@ export type ModuleValidationInfo = {
 
 export class ValidationHelper {
   static getValidationInfoForModule(module: Module, allSemesters: Semester[]): ModuleValidationInfo | null {
-    // todo: if module is duplicate, this will get first occurence. Could this cause problems?
+    const allPlannedModules = allSemesters.reduce((modules, sem) => [...modules, ...sem.modules.flatMap(m =>({semesterNumber: sem.number, module: m}))], [] as ModuleAndSemesterNumber[]);
+
+    const alreadyInPlanValidationInfo = this.getValidationInfoForModuleAlreadyInPlan(module.id, allPlannedModules);
+    if (alreadyInPlanValidationInfo) {
+      return alreadyInPlanValidationInfo;
+    }
+
+    // we now know, that only one semester contains the module
     const semesterForModule = allSemesters.find(s => s.modules.some(m => m.id === module.id));
     if(!semesterForModule) {
       // module is not planned, does not need validation right now
       return null;
     }
     const semesterInfoForModule = SemesterInfo.parse(semesterForModule.name);
-    const allPlannedModules = allSemesters.reduce((modules, sem) => [...modules, ...sem.modules], [] as Module[]); // make distinct?
-
     if(semesterInfoForModule == null) {
       return null;
     }
 
     if(this.isSemesterInThePast(semesterInfoForModule)) {
-      console.log('past', module.id, module);
       if(this.isModuleInWrongSemester(module, semesterInfoForModule)) {
         return {type: 'soft', tooltip: `${module.name} findet nur im ${module.term} statt`};
       }
-      if(this.isModuleAlreadyInPlan(module.id, allPlannedModules)) {
-        // todo: reference semester
-        // todo: give option to remove
-        return {type: 'hard', tooltip: `Modul bereits geplant`};
-      }
       if(this.isModuleInactive(module)) {
-        // const successor = allModules.find(m => m.id === module.successorModuleId);
         if(module.successorModuleId) {
-          // todo: give option to replace
+          // todo: give action to replace
           return {type: 'soft', tooltip: `Modul hat Nachfolger ${module.successorModuleId}`};
         }
       }
@@ -46,17 +44,12 @@ export class ValidationHelper {
     if(this.isModuleInWrongSemester(module, semesterInfoForModule)) {
       return {type: 'hard', tooltip: `${module.name} findet nur im ${module.term} statt`};
     }
-    if(this.isModuleAlreadyInPlan(module.id, allPlannedModules)) {
-      // todo: reference semester
-      // todo: give option to remove
-      return {type: 'hard', tooltip: `Modul bereits geplant`}
-    }
     if(this.isModuleInactive(module)) {
-      // todo: reference semester
-      return {type: 'hard', tooltip: `Module ${module.name} wird nicht mehr angeboten`};
+      return {type: 'hard', tooltip: `Modul ${module.name} wird nicht mehr angeboten`};
     }
-    if(this.isModuleBeforeRecommendedModules(module, semesterInfoForModule, allSemesters)) {
-      return {type: 'soft', tooltip: `Empfohlene Module ${module.recommendedModuleIds.join(',')}`};
+    const moduleBeforeRecommendedModulesValidationInfo = this.getValidationInfoForModuleBeforeRecommendedModules(module, semesterForModule.number, allSemesters);
+    if(moduleBeforeRecommendedModulesValidationInfo) {
+      return moduleBeforeRecommendedModulesValidationInfo;
     }
 
     return null;
@@ -66,25 +59,53 @@ export class ValidationHelper {
     return semesterInfo.difference(SemesterInfo.now()) < 0
   }
 
-private static isModuleInWrongSemester(module: Module, semesterInfo: SemesterInfo): boolean {
-  return module.term === 'HS' ? semesterInfo.isSpringSemester : !semesterInfo.isSpringSemester;
+  private static isModuleInWrongSemester(module: Module, semesterInfo: SemesterInfo): boolean {
+    switch (module.term) {
+      case 'FS':
+        return !semesterInfo.isSpringSemester;
+      case 'HS':
+        return semesterInfo.isSpringSemester;
+      case 'both':
+        console.log('both', module.id);
+        return false;
+      default:
+        console.error(`Invalid term ${module.term} for module ${module.id}`);
+        return true;
+    }
+  }
+
+  private static getValidationInfoForModuleAlreadyInPlan(moduleId: string, plannedModules: ModuleAndSemesterNumber[]): ModuleValidationInfo | null {
+    // todo: give action to remove second occurence
+    const occurences = plannedModules.filter(m => m.module.id === moduleId);
+    if(occurences.length <= 1) {
+      return null;
+    }
+    return { type: 'hard', tooltip: `Modul is doppelt im Plan, in Semester ${occurences.map(m => m.semesterNumber).join(', ')}` };
+  }
+
+  private static isModuleInactive(module: Module): boolean {
+    return module.isDeactivated;
+  }
+
+  private static getValidationInfoForModuleBeforeRecommendedModules(module: Module, semesterNumberForModule: number, allSemesters: Semester[]): ModuleValidationInfo | null {
+    if(!module.recommendedModuleIds.length) {
+      return null;
+    }
+
+    const missingOrLater = module.recommendedModuleIds
+      .map(moduleId =>
+        ({moduleId, semesterNumber: allSemesters.find(semester => semester.moduleIds.includes(moduleId))?.number})
+      )
+      .filter(({semesterNumber}) =>
+        !semesterNumber || semesterNumber > semesterNumberForModule
+      );
+
+    return {type: 'soft', tooltip: `Empfohlene Module ${missingOrLater.map(m => m.moduleId).join(',')}`};
+  }
 }
 
-private static isModuleAlreadyInPlan(moduleId: string, plannedModules: Module[]): boolean {
-  return plannedModules.some(m => m.id === moduleId);
-}
-
-private static isModuleInactive(module: Module): boolean {
-  // todo: logic
-  // MGE -> inactive without successor
-  // PF -> inactive with successor
-  // todo: is there active with successor?
-return false;
-}
-
-private static isModuleBeforeRecommendedModules(module: Module, semesterInfoForModule: SemesterInfo, allSemesters: Semester[]): boolean {
-  // todo: logic
-  return false;
-}
-}
+type ModuleAndSemesterNumber = {
+  semesterNumber: number;
+  module: Module;
+};
 

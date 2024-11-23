@@ -25,16 +25,18 @@ export const store = createStore({
     getModulesByIds: state => moduleIds => {
       return moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f);
     },
+    totalPlannedCredits: () => getPlannedCredits(),
+    totalEarnedCredits: () => getEarnedCredits(),
     plannedModuleIds: state => state.semesters.flatMap(semester => semester.moduleIds),
     startSemester: state => state.startSemester,
     studienordnung: state => state.studienordnung,
     validationEnabled: state => state.validationEnabled,
     enrichedCategories: (state, getters) => {
       return state.categories.map(category => ({
-        earnedCredits: getEarnedCredits(category),
-        plannedCredits: getPlannedCredits(category),
-        colorClass: getColorClassForCategoryId(category.id),
         ...category,
+        earnedEcts: getEarnedCredits(category),
+        plannedEcts: getPlannedCredits(category),
+        colorClass: getColorClassForCategoryId(category.id),
         modules: getters.getModulesByIds(category.moduleIds),
       }));
     },
@@ -104,7 +106,7 @@ export const store = createStore({
     async loadModules (context) {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
       const json = await response.json();
-      const modules = json.map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, Number(m.ects), m.term))
+      const modules = json.map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, Number(m.ects), m.term, m.isDeactivated));
       context.commit('setModules', modules);
     },
     async loadCategories (context) {
@@ -138,13 +140,14 @@ export const store = createStore({
     },
     updateValidationInfoOfAllModules(context) {
       if(context.getters.validationEnabled) {
+        // todo: should we only validate those, that are in a semester?
         context.getters.modules.forEach(module => module.validateModule(context.getters.enrichedSemesters));
       }
     },
   }
 });
 
-function getEarnedCredits(category: Category | undefined): number {
+function getEarnedCredits(category?: Category): number {
   if (store.getters.startSemester === undefined) {
     return 0;
   }
@@ -158,10 +161,10 @@ function getEarnedCredits(category: Category | undefined): number {
     .slice(0, indexOfLastCompletedSemester)
     .flatMap((semester) => semester.modules)
     .filter((module) => !category || category.moduleIds.includes(module.id))
-    .reduce(sumCredits, 0);
+    .reduce((previousTotal, module) => previousTotal + module.ects, 0);
 }
 
-function getPlannedCredits(category: Category | undefined): number {
+function getPlannedCredits(category?: Category): number {
   if (store.getters.startSemester === undefined) {
     return 0;
   }
@@ -176,11 +179,7 @@ function getPlannedCredits(category: Category | undefined): number {
   return semestersToConsider
     .flatMap((semester) => semester.modules)
     .filter((module) => !category || category.moduleIds.includes(module.id))
-    .reduce(sumCredits, 0);
-}
-
-function sumCredits(previousTotal: number, module: Module): number {
-  return previousTotal + module.ects;
+    .reduce((previousTotal, module) => previousTotal + module.ects, 0);
 }
 
 

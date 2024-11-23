@@ -5,8 +5,12 @@
     :class="computedClasses"
   >
   <div class="absolute left-2">
-    <font-awesome-icon v-if="module.validationInfo && module.validationInfo.type === 'soft'" :icon="['fa', 'info-circle']"></font-awesome-icon>
-    <font-awesome-icon v-if="module.validationInfo && module.validationInfo.type === 'hard'" :icon="['fa', 'circle-exclamation']"></font-awesome-icon>
+    <span v-if="module.validationInfo && module.validationInfo.type === 'soft'" :title="module.validationInfo.tooltip">
+    <font-awesome-icon  :icon="['fa', 'info-circle']"></font-awesome-icon>
+  </span>
+  <span v-if="module.validationInfo && module.validationInfo.type === 'hard'" :title="module.validationInfo.tooltip">
+    <font-awesome-icon  :icon="['fa', 'circle-exclamation']"></font-awesome-icon>
+  </span>
   </div>
     <button
       class="absolute opacity-0 touch-only:opacity-75 group-hover/module:opacity-75

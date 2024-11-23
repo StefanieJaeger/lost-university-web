@@ -78,9 +78,6 @@
         >Studienordnung</a>
       </div>
       <Categories
-        :categories="enrichedCategories"
-        :total-earned-ects="totalEarnedEcts"
-        :total-planned-ects="totalPlannedEcts"
         @on-add-module="addModule"
       />
     </article>
@@ -115,15 +112,13 @@ import {defineComponent} from 'vue';
 import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
 import ToastNotification from '../components/ToastNotification.vue';
-import {Category, Module, UnknownModule} from '../helpers/types';
+import { Module, UnknownModule} from '../helpers/types';
 import {SemesterInfo} from "../helpers/semester-info";
 import Categories from '../components/Categories.vue';
 import { StorageHelper } from '../helpers/storage-helper';
 import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
 import { store } from '../helpers/store';
 import { mapGetters } from 'vuex'
-
-const currentSemester = SemesterInfo.now();
 
 export default defineComponent({
   name: 'Home',
@@ -140,13 +135,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(['modules', 'enrichedCategories', 'enrichedFocuses', 'enrichedSemesters', 'startSemester', 'studienordnung', 'validationEnabled']),
-    totalPlannedEcts() {
-      return this.getPlannedCredits();
-    },
-    totalEarnedEcts() {
-      return this.getEarnedCredits();
-    },
+    ...mapGetters(['modules', 'enrichedFocuses', 'enrichedSemesters', 'startSemester', 'studienordnung', 'validationEnabled']),
     addingSemesterIsDisabled() {
       return this.enrichedSemesters.length >= SemesterInfo.maxNumberOfAllowedSemesters;
     },
@@ -187,40 +176,6 @@ export default defineComponent({
       return this.enrichedSemesters.find(
         (semester) => semester.modules.some((module) => module.name === moduleName),
       )?.number;
-    },
-    getEarnedCredits(category?: Category): number {
-      if (this.startSemester === undefined) {
-        return 0;
-      }
-
-      const indexOfLastCompletedSemester = currentSemester.difference(this.startSemester);
-
-      if (indexOfLastCompletedSemester < 0) {
-        return 0;
-      }
-
-      return this.enrichedSemesters
-        .slice(0, indexOfLastCompletedSemester)
-        .flatMap((semester) => semester.modules)
-        .filter((module) => !category || category.moduleIds.includes(module.id))
-        .reduce(this.sumCredits, 0);
-    },
-    getPlannedCredits(category?: Category): number {
-      if (this.startSemester === undefined) {
-        return 0;
-      }
-
-      let semestersToConsider = this.enrichedSemesters;
-      const indexOfLastCompletedSemester = currentSemester.difference(this.startSemester);
-
-      if (indexOfLastCompletedSemester >= 0) {
-        semestersToConsider = semestersToConsider.slice(indexOfLastCompletedSemester)
-      }
-
-      return semestersToConsider
-        .flatMap((semester) => semester.modules)
-        .filter((module) => !category || category.moduleIds.includes(module.id))
-        .reduce(this.sumCredits, 0);
     },
     addModule(moduleName: string, semesterNumber?: number) {
       const blockingSemesterNumber = this.getPlannedSemesterForModule(moduleName);
