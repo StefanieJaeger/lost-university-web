@@ -4,14 +4,20 @@
     class="rounded group/module relative p-2 px-8 flex flex-col items-center text-center text-white w-full"
     :class="computedClasses"
   >
-  <div class="absolute left-2">
-    <span v-if="module.validationInfo && module.validationInfo.severity === 'soft'" :title="module.validationInfo.tooltip">
-    <font-awesome-icon  :icon="['fa', 'info-circle']"></font-awesome-icon>
-  </span>
-  <span v-if="module.validationInfo && module.validationInfo.severity === 'hard'" :title="module.validationInfo.tooltip">
-    <font-awesome-icon  :icon="['fa', 'circle-exclamation']"></font-awesome-icon>
-  </span>
-  </div>
+    <div class="absolute left-2">
+      <span
+        v-if="module.validationInfo && module.validationInfo.severity === 'soft'"
+        :title="module.validationInfo.tooltip"
+      >
+        <font-awesome-icon :icon="['fa', 'info-circle']" />
+      </span>
+      <span
+        v-if="module.validationInfo && module.validationInfo.severity === 'hard'"
+        :title="module.validationInfo.tooltip"
+      >
+        <font-awesome-icon :icon="['fa', 'circle-exclamation']" />
+      </span>
+    </div>
     <button
       class="absolute opacity-0 touch-only:opacity-75 group-hover/module:opacity-75
              hover:!opacity-100 right-2 transition-opacity duration-75"

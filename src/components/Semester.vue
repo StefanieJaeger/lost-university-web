@@ -1,7 +1,7 @@
 <template>
   <draggable
-    class="gap-y-1 flex flex-col items-center"
     v-model="modules"
+    class="gap-y-1 flex flex-col items-center"
     group="semester"
     item-key="id"
     :animation="200"
@@ -85,7 +85,10 @@ export default defineComponent({
         return this.semester.modules;
       },
       set(modules: Module[]) {
-        store.commit('setModuleIdsForSemester', {semesterNumber: this.semester.number, moduleIds: modules.map(m => m.id)});
+        store.commit('setModuleIdsForSemester', {
+          semesterNumber: this.semester.number,
+          moduleIds: modules.map(m => m.id)
+        });
       }
     },
     term(): Term {

@@ -1,4 +1,4 @@
-import {parseQuery} from "vue-router";
+import { parseQuery } from "vue-router";
 import { SemesterInfo } from "./semester-info";
 import { Semester } from "./types";
 import { store } from "./store";
@@ -11,7 +11,10 @@ export class StorageHelper {
   private static readonly URL_START_SEMESTER_KEY = 'startSemester';
   private static readonly URL_VALIDATION_ENABLED_KEY = 'validation';
 
-  static getDataFromUrlHash(urlHash: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): [Semester[], SemesterInfo | undefined, boolean] {
+  static getDataFromUrlHash(
+    urlHash: string,
+    unknownModuleCallback: (semesterNumber: number, moduleId: string) => void
+  ): [Semester[], SemesterInfo | undefined, boolean] {
       const planIndicator = `#/${this.URL_PLAN_KEY}/`;
 
       if (!urlHash.startsWith(planIndicator)) {
@@ -43,10 +46,14 @@ export class StorageHelper {
           .slice(planIndicator.length)
           .split(this.URL_SEMESTER_SEPARATOR)
           .map((semesterPart, index) =>
-            new Semester(index + 1, this.getModuleIdsFromSemesterPart(semesterPart, unknownModuleCallback)).setName(newStartSemester)
+            new Semester(
+              index + 1,
+              this.getModuleIdsFromSemesterPart(semesterPart, unknownModuleCallback)
+            ).setName(newStartSemester)
           );
 
-        const newestHash = `${planIndicator}${this.turnPlanDataIntoUrlHash(newSemesters, newStartSemester, validation)}`;
+        const hashFromNewSemesters = this.turnPlanDataIntoUrlHash(newSemesters, newStartSemester, validation);
+        const newestHash = `${planIndicator}${hashFromNewSemesters}`;
         if (urlHash !== newestHash) {
           window.location.hash = newestHash;
         }
@@ -55,7 +62,6 @@ export class StorageHelper {
 
         return [newSemesters, newStartSemester, validation];
       }
-
       return [[], undefined, true];
   }
 
@@ -69,7 +75,11 @@ export class StorageHelper {
     }
   }
 
-  private static turnPlanDataIntoUrlHash(semesters: Semester[], startSemester: SemesterInfo | undefined, validationEnabled: boolean): string {
+  private static turnPlanDataIntoUrlHash(
+    semesters: Semester[],
+    startSemester: SemesterInfo | undefined,
+    validationEnabled: boolean
+  ): string {
     let plan = semesters
       .map((semester) => semester.moduleIds.join(this.URL_MODULE_SEPARATOR))
       .join(this.URL_SEMESTER_SEPARATOR);
@@ -96,7 +106,10 @@ export class StorageHelper {
     return !input || !input.trim();
   }
 
-  private static getModuleIdsFromSemesterPart(semesterPart: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): string[] {
+  private static getModuleIdsFromSemesterPart(
+    semesterPart: string,
+    unknownModuleCallback: (semesterNumber: number, moduleId: string) => void
+  ): string[] {
     const moduleIds = semesterPart
       .split(this.URL_MODULE_SEPARATOR)
       .filter(moduleId => !(this.isNullOrWhitespace(moduleId)));

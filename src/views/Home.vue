@@ -2,13 +2,24 @@
   <div class="fixed top-2 right-2 z-40 flex items-start pt-3 w-1/3">
     <SwitchGroup class="pt-2 ml-auto">
       <div class="flex items-center">
-        <SwitchLabel class="mr-4">Validierung:</SwitchLabel>
-        <Switch :modelValue="validationEnabled" @update:modelValue="setValidationEnabled" :class="validationEnabled ? 'bg-teal-700' : 'bg-gray-500'" class="relative inline-flex h-6 w-11 items-center rounded-full">
-          <span aria-hidden="true" :class="validationEnabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
-        </Switch>
+        <SwitchLabel class="mr-4">
+          Validierung:
+        </SwitchLabel>
+        <HeadlessSwitch
+          :model-value="validationEnabled"
+          :class="validationEnabled ? 'bg-teal-700' : 'bg-gray-500'"
+          class="relative inline-flex h-6 w-11 items-center rounded-full"
+          @update:model-value="setValidationEnabled"
+        >
+          <span
+            aria-hidden="true"
+            :class="validationEnabled ? 'translate-x-6' : 'translate-x-1'"
+            class="inline-block h-4 w-4 transform rounded-full bg-white transition"
+          />
+        </HeadlessSwitch>
       </div>
     </SwitchGroup>
-    <GlobalValidationInfo></GlobalValidationInfo>
+    <GlobalValidationInfo />
   </div>
   <div class="fixed top-2 right-2 z-50">
     <ToastNotification
@@ -42,9 +53,12 @@
       class="transition-colors text-white w-8 px-2 rounded"
       :class="addingSemesterIsDisabled? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-800'"
       type="button"
-      @click="addSemester"
       :disabled="addingSemesterIsDisabled"
-      :title="addingSemesterIsDisabled ? 'Mehr als 14 Semester können an der OST nicht geplant werden, da sonst eine Exmatrikulation stattfindet' : ''"
+      :title="addingSemesterIsDisabled ?
+        'Mehr als 14 Semester können an der OST nicht geplant werden, da sonst eine Exmatrikulation stattfindet' :
+        ''
+      "
+      @click="addSemester"
     >
       +
     </button>
@@ -61,8 +75,8 @@
         <select
           id="last-semester-select"
           :value="startSemester"
-          @change="setStartSemester($event.target.value)"
           class="ml-2 px-3 py-2 rounded"
+          @change="setStartSemester($event.target.value)"
         >
           <option
             v-for="semester in selectableStartSemesters"
@@ -109,22 +123,31 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
 import ToastNotification from '../components/ToastNotification.vue';
 import { Module, UnknownModule} from '../helpers/types';
-import {SemesterInfo} from "../helpers/semester-info";
+import { SemesterInfo } from "../helpers/semester-info";
 import Categories from '../components/Categories.vue';
 import { StorageHelper } from '../helpers/storage-helper';
-import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
+import { Switch as HeadlessSwitch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
 import { store } from '../helpers/store';
 import { mapGetters } from 'vuex';
 import GlobalValidationInfo from '../components/GlobalValidationInfo.vue';
 
 export default defineComponent({
   name: 'Home',
-  components: { SemesterComponent, FocusComponent,  ToastNotification, Categories, Switch, SwitchGroup, SwitchLabel, GlobalValidationInfo },
+  components: {
+    SemesterComponent,
+    FocusComponent,
+    ToastNotification,
+    Categories,
+    HeadlessSwitch,
+    SwitchGroup,
+    SwitchLabel,
+    GlobalValidationInfo
+  },
   data() {
     return {
       selectableStartSemesters: SemesterInfo.selectableStartSemesters,
@@ -137,7 +160,14 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(['modules', 'enrichedFocuses', 'enrichedSemesters', 'startSemester', 'studienordnung', 'validationEnabled']),
+    ...mapGetters([
+      'modules',
+      'enrichedFocuses',
+      'enrichedSemesters',
+      'startSemester',
+      'studienordnung',
+      'validationEnabled'
+    ]),
     addingSemesterIsDisabled() {
       return this.enrichedSemesters.length >= SemesterInfo.maxNumberOfAllowedSemesters;
     },
@@ -158,7 +188,7 @@ export default defineComponent({
   methods: {
     setStartSemester(startSemester: string) {
       const newStartSemester = SemesterInfo.parse(startSemester);
-      store.dispatch('setStartSemester', newStartSemester).then(_ => this.updateUrlFragment());
+      store.dispatch('setStartSemester', newStartSemester).then(() => this.updateUrlFragment());
     },
     setValidationEnabled(validationEnabled: boolean) {
       store.commit('setValidationEnabled', validationEnabled);
@@ -166,7 +196,14 @@ export default defineComponent({
     },
     sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
     getPlanDataFromUrl() {
-      const [semesters, startSemester, validationEnabled] = StorageHelper.getDataFromUrlHash(window.location.hash, (semesterNumber: number, moduleId: string) => this.showUnknownModulesError(semesterNumber, moduleId));
+      const [
+        semesters,
+        startSemester,
+        validationEnabled
+      ] = StorageHelper.getDataFromUrlHash(
+        window.location.hash,
+        (semesterNumber: number, moduleId: string) => this.showUnknownModulesError(semesterNumber, moduleId)
+      );
       store.commit('setValidationEnabled', validationEnabled);
       store.commit('setSemesters', semesters);
       store.dispatch('setStartSemester', startSemester).then(() => this.updateUrlFragment());
@@ -218,7 +255,9 @@ export default defineComponent({
     },
     addSemester() {
       if(this.addingSemesterIsDisabled) {
-        this.showErrorMsg(`Es können nicht mehr als ${SemesterInfo.maxNumberOfAllowedSemesters} Semester geplant werden!`);
+        this.showErrorMsg(
+          `Es können nicht mehr als ${SemesterInfo.maxNumberOfAllowedSemesters} Semester geplant werden!`
+        );
         return;
       }
       store.commit('addSemester')

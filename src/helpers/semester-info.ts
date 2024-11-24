@@ -22,13 +22,14 @@ export class SemesterInfo {
   }
 
   static nextSemester(term: Term) {
+    const now = new Date();
+
     switch (term) {
       case 'both':
         return SemesterInfo.now().plus(1);
       case 'FS':
         return new SemesterInfo(true, new Date().getFullYear() + 1);
       case 'HS':
-        const now = new Date();
         return new SemesterInfo(false, isSpringSemester(now) ? now.getFullYear() : now.getFullYear() + 1);
       default:
         return null;

@@ -1,7 +1,7 @@
 import { createStore } from 'vuex'
 import { Category, Focus, Module, Semester } from './types';
 import { SemesterInfo } from './semester-info';
-import {getColorClassForCategoryId} from '../helpers/color-helper';
+import { getColorClassForCategoryId } from '../helpers/color-helper';
 
 const BASE_URL = 'https://raw.githubusercontent.com/StefanieJaeger/lost-university-data/SJ/data-preparation/data';
 const ROUTE_MODULES = '/modules.json';
@@ -23,44 +23,48 @@ export const store = createStore({
   getters: {
     modules: state => state.modules,
     semesters: state => state.semesters,
-    modulesByIds: state => moduleIds => {
-      return moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f);
-    },
+    modulesByIds: state => moduleIds =>
+      moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f),
     totalPlannedCredits: () => getPlannedCredits(),
     totalEarnedCredits: () => getEarnedCredits(),
     plannedModuleIds: state => state.semesters.flatMap(semester => semester.moduleIds),
     startSemester: state => state.startSemester,
     studienordnung: state => state.studienordnung,
     validationEnabled: state => state.validationEnabled,
-    numberOfHardValidationProblems: state => state.modules.map(m => m.validationInfo).filter(f => f?.severity === 'hard').length,
-    hardValidationProblemsByType: state => type => {
-      return state.modules.map(m => m.validationInfo).filter(f => f?.severity === 'hard' && f?.type === type);
-    },
-    enrichedCategories: (state, getters) => {
-      return state.categories.map(category => ({
+    numberOfHardValidationProblems: state =>
+      state.modules.map(m => m.validationInfo).filter(f => f?.severity === 'hard').length,
+    hardValidationProblemsByType: state => type =>
+      state.modules.map(m => m.validationInfo).filter(f => f?.severity === 'hard' && f?.type === type),
+    enrichedCategories: (state, getters) =>
+      state.categories.map(category => ({
         ...category,
         earnedEcts: getEarnedCredits(category),
         plannedEcts: getPlannedCredits(category),
         colorClass: getColorClassForCategoryId(category.id),
         modules: getters.modulesByIds(category.moduleIds),
-      }));
-    },
+      })),
     enrichedFocuses: (state, getters) => {
       const plannedModuleIds = getters.plannedModuleIds;
       const numberOfModulesRequiredToGetFocus = 8;
       return state.focuses.map(focus => ({
         ...focus,
-        numberOfMissingModules: Math.max(0, numberOfModulesRequiredToGetFocus - focus.moduleIds.filter(moduleId => plannedModuleIds.includes(moduleId)).length),
-        availableModules: getters.modulesByIds(focus.moduleIds.filter(moduleId => !plannedModuleIds.includes(moduleId))),
+        numberOfMissingModules:
+          Math.max(
+            0,
+            numberOfModulesRequiredToGetFocus - focus.moduleIds.filter(moduleId =>
+              plannedModuleIds.includes(moduleId)).length
+          ),
+        availableModules: getters.modulesByIds(
+          focus.moduleIds.filter(moduleId => !plannedModuleIds.includes(moduleId))
+        ),
         modules: getters.modulesByIds(focus.moduleIds),
       }));
     },
-    enrichedSemesters: (state, getters) => {
-      return state.semesters.map(semester => ({
+    enrichedSemesters: (state, getters) =>
+      state.semesters.map(semester => ({
         ...semester,
         modules: getters.modulesByIds(semester.moduleIds),
-      }));
-    },
+      })),
   },
   mutations: {
     setModules(state, modules: Module[]) {
@@ -121,7 +125,21 @@ export const store = createStore({
     async loadModules (context) {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
       const json = await response.json();
-      const modules = json.map(m => new Module(m.id, m.name, m.url, m.categoriesForColoring, Number(m.ects), m.term, m.recommendedModuleIds, m.dependentModuleIds, m.successorModuleId, m.predecessorModuleId, m.isDeactivated));
+      const modules = json.map(m =>
+        new Module(
+          m.id,
+          m.name,
+          m.url,
+          m.categoriesForColoring,
+          Number(m.ects),
+          m.term,
+          m.recommendedModuleIds,
+          m.dependentModuleIds,
+          m.successorModuleId,
+          m.predecessorModuleId,
+          m.isDeactivated
+        )
+      );
       context.commit('setModules', modules);
     },
     async loadCategories (context) {

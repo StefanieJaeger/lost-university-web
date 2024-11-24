@@ -1,34 +1,80 @@
 <template>
-  <div class="w-full mx-2 text-sm bg-red-200 rounded" v-if="numberOfValidationProblems > 0">
+  <div
+    v-if="numberOfValidationProblems > 0"
+    class="w-full mx-2 text-sm bg-red-200 rounded"
+  >
     <Disclosure v-slot="{ open }">
       <DisclosureButton
         class="flex w-full justify-between text-red-800 px-4 py-2 font-medium"
       >
         <span>Es gibt {{ numberOfValidationProblems }} Probleme:</span>
         <font-awesome-icon
-            :icon="['fa', open ? 'chevron-up' : 'chevron-down']"
-            class="h-5 w-5 text-red-800 ml-2"
-          />
+          :icon="['fa', open ? 'chevron-up' : 'chevron-down']"
+          class="h-5 w-5 text-red-800 ml-2"
+        />
       </DisclosureButton>
       <DisclosurePanel class="w-full px-4 py-2 text-gray-500">
         <ul class="list-disc list-inside">
-          <li v-for="problem in duplicateModulesProblems" :key="problem.moduleId"  class="h-8 place-content-center">
+          <li
+            v-for="problem in duplicateModulesProblems"
+            :key="problem.moduleId"
+            class="h-8 place-content-center"
+          >
             <span class="mr-2">{{ problem.text }}</span>
-            <button class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded" type="button" @click="removeModule(problem.moduleId, problem.semesterNumbersToRemoveFrom)">Duplikate entfernen</button>
+            <button
+              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              type="button"
+              @click="removeModule(problem.moduleId, problem.semesterNumbersToRemoveFrom)"
+            >
+              Duplikate entfernen
+            </button>
           </li>
         </ul>
         <ul class="list-disc list-inside">
-          <li v-for="problem in inactiveModuleProblems" :key="problem.moduleId"  class="h-8 place-content-center">
+          <li
+            v-for="problem in inactiveModuleProblems"
+            :key="problem.moduleId"
+            class="h-8 place-content-center"
+          >
             <span class="mr-2">{{ problem.text }}</span>
-            <button class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded" type="button" @click="removeModule(problem.moduleId)">entfernen</button>
-            <button v-if="problem.successorModuleId" class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded" type="button" @click="replaceModuleWithSuccessor(problem.moduleId, problem.successorModuleId)">Nachfolger planen</button>
+            <button
+              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              type="button"
+              @click="removeModule(problem.moduleId)"
+            >
+              entfernen
+            </button>
+            <button
+              v-if="problem.successorModuleId"
+              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              type="button"
+              @click="replaceModuleWithSuccessor(problem.moduleId, problem.successorModuleId)"
+            >
+              Nachfolger planen
+            </button>
           </li>
         </ul>
         <ul class="list-disc list-inside">
-          <li v-for="problem in wrongTermProblems" :key="problem.moduleId" class="h-8 place-content-center">
+          <li
+            v-for="problem in wrongTermProblems"
+            :key="problem.moduleId"
+            class="h-8 place-content-center"
+          >
             <span class="mr-2">{{ problem.text }}</span>
-            <button class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded" type="button" @click="removeModule(problem.moduleId)">entfernen</button>
-            <button class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded" type="button" @click="moveModuleToSemester(problem.moduleId, problem.targetSemesterNumber)">verschieben</button>
+            <button
+              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              type="button"
+              @click="removeModule(problem.moduleId)"
+            >
+              entfernen
+            </button>
+            <button
+              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              type="button"
+              @click="moveModuleToSemester(problem.moduleId, problem.targetSemesterNumber)"
+            >
+              verschieben
+            </button>
           </li>
         </ul>
       </DisclosurePanel>
@@ -38,8 +84,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/vue';
-import type { ModuleValidationInfo_Duplicate, ModuleValidationInfo_Inactive, ModuleValidationInfo_WrongTerm } from '../helpers/validation-helper';
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
+import type {
+  ModuleValidationInfo_Duplicate,
+  ModuleValidationInfo_Inactive,
+  ModuleValidationInfo_WrongTerm
+} from '../helpers/validation-helper';
 import { store } from '../helpers/store';
 import { StorageHelper } from '../helpers/storage-helper';
 
@@ -85,7 +135,10 @@ export default defineComponent({
       this.updateUrlFragment();
     },
     updateUrlFragment() {
-      StorageHelper.updateUrlFragment(store.getters.enrichedSemesters, store.getters.startSemester, store.getters.validationEnabled);
+      StorageHelper.updateUrlFragment(
+        store.getters.enrichedSemesters,
+        store.getters.startSemester,
+        store.getters.validationEnabled);
     },
   }
 });
