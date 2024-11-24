@@ -1,6 +1,7 @@
 import {parseQuery} from "vue-router";
 import { SemesterInfo } from "./semester-info";
 import { Semester } from "./types";
+import { store } from "./store";
 
 export class StorageHelper {
   private static readonly LOCALSTORAGE_PLAN_KEY = 'plan';
@@ -111,12 +112,13 @@ export class StorageHelper {
       .split(this.URL_MODULE_SEPARATOR)
       .filter(moduleId => !(this.isNullOrWhitespace(moduleId)));
 
-      // todo: validation is not needed
-    // moduleIds.forEach((moduleId, index) => {
-    //   if(!store.getters.modules.find(m => m.id === moduleId)) {
-    //     unknownModuleCallback?.(index + 1, moduleId);
-    //   }
-    // });
+    // todo: unknown are not in url, so alert is wrong
+    // todo: should we remove id from list?
+    moduleIds.forEach((moduleId, index) => {
+      if(!store.getters.modules.find(m => m.id === moduleId)) {
+        unknownModuleCallback?.(index + 1, moduleId);
+      }
+    });
 
     return moduleIds;
   }

@@ -5,10 +5,10 @@
     :class="computedClasses"
   >
   <div class="absolute left-2">
-    <span v-if="module.validationInfo && module.validationInfo.type === 'soft'" :title="module.validationInfo.tooltip">
+    <span v-if="module.validationInfo && module.validationInfo.severity === 'soft'" :title="module.validationInfo.tooltip">
     <font-awesome-icon  :icon="['fa', 'info-circle']"></font-awesome-icon>
   </span>
-  <span v-if="module.validationInfo && module.validationInfo.type === 'hard'" :title="module.validationInfo.tooltip">
+  <span v-if="module.validationInfo && module.validationInfo.severity === 'hard'" :title="module.validationInfo.tooltip">
     <font-awesome-icon  :icon="['fa', 'circle-exclamation']"></font-awesome-icon>
   </span>
   </div>

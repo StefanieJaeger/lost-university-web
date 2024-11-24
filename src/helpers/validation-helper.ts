@@ -1,12 +1,8 @@
 import type { Module, Semester } from '../helpers/types';
 import { SemesterInfo } from './semester-info';
+import { store } from './store';
 
-export type ModuleValidationInfo = {
-  type: 'soft' | 'hard';
-  tooltip: string; // shown on module
-  text?: string; // shown in global alert
-  action?: () => void; // action in global alert (unsure if this works)
-}
+export type ModuleValidationInfo = { severity: 'soft' | 'hard', tooltip: string } & ({type: 'duplicate', affectedSemesterNumbers: number[] } | {type: 'wrongSemester', targetSemesterNumber: number} | {type: 'inactive', successorModuleId: string | undefined} | {type: 'beforeRecommended', missingModuleIds: string[], laterModuleIds: string[]});
 
 export class ValidationHelper {
   static getValidationInfoForModule(module: Module, allSemesters: Semester[]): ModuleValidationInfo | null {
@@ -30,22 +26,23 @@ export class ValidationHelper {
 
     if(this.isSemesterInThePast(semesterInfoForModule)) {
       if(this.isModuleInWrongSemester(module, semesterInfoForModule)) {
-        return {type: 'soft', tooltip: `${module.name} findet nur im ${module.term} statt`};
+        const targetSemesterNumber = semesterForModule.number + 1;
+        return { type: 'wrongSemester', targetSemesterNumber,  severity: 'soft', tooltip: `${module.name} findet nur im ${module.term} statt`};
       }
       if(this.isModuleInactive(module)) {
         if(module.successorModuleId) {
-          // todo: give action to replace
-          return {type: 'soft', tooltip: `Modul hat Nachfolger ${module.successorModuleId}`};
+          return { type: 'inactive', successorModuleId: module.successorModuleId, severity: 'soft', tooltip: `Modul hat Nachfolger ${module.successorModuleId}`};
         }
       }
       return null;
     }
 
     if(this.isModuleInWrongSemester(module, semesterInfoForModule)) {
-      return {type: 'hard', tooltip: `${module.name} findet nur im ${module.term} statt`};
+      const targetSemesterNumber = semesterForModule.number + 1;
+      return { type: 'wrongSemester', targetSemesterNumber, severity: 'hard', tooltip: `${module.name} findet nur im ${module.term} statt`};
     }
     if(this.isModuleInactive(module)) {
-      return {type: 'hard', tooltip: `Modul ${module.name} wird nicht mehr angeboten`};
+      return { type: 'inactive', successorModuleId: module.successorModuleId, severity: 'hard', tooltip: `Modul ${module.name} wird nicht mehr angeboten`};
     }
     const moduleBeforeRecommendedModulesValidationInfo = this.getValidationInfoForModuleBeforeRecommendedModules(module, semesterForModule.number, allSemesters);
     if(moduleBeforeRecommendedModulesValidationInfo) {
@@ -56,7 +53,7 @@ export class ValidationHelper {
   }
 
   private static isSemesterInThePast(semesterInfo: SemesterInfo) {
-    return semesterInfo.difference(SemesterInfo.now()) < 0
+    return semesterInfo.difference(SemesterInfo.now()) < 0;
   }
 
   private static isModuleInWrongSemester(module: Module, semesterInfo: SemesterInfo): boolean {
@@ -66,7 +63,6 @@ export class ValidationHelper {
       case 'HS':
         return semesterInfo.isSpringSemester;
       case 'both':
-        console.log('both', module.id);
         return false;
       default:
         console.error(`Invalid term ${module.term} for module ${module.id}`);
@@ -75,12 +71,12 @@ export class ValidationHelper {
   }
 
   private static getValidationInfoForModuleAlreadyInPlan(moduleId: string, plannedModules: ModuleAndSemesterNumber[]): ModuleValidationInfo | null {
-    // todo: give action to remove second occurence
     const occurences = plannedModules.filter(m => m.module.id === moduleId);
     if(occurences.length <= 1) {
       return null;
     }
-    return { type: 'hard', tooltip: `Modul is doppelt im Plan, in Semester ${occurences.map(m => m.semesterNumber).join(', ')}` };
+    const affectedSemesterNumbers = occurences.slice(1).map(m => m.semesterNumber);
+    return { type: 'duplicate', affectedSemesterNumbers, severity: 'hard', tooltip: `Modul is doppelt im Plan, in Semester ${occurences.map(m => m.semesterNumber).join(', ')}` };
   }
 
   private static isModuleInactive(module: Module): boolean {
@@ -88,19 +84,52 @@ export class ValidationHelper {
   }
 
   private static getValidationInfoForModuleBeforeRecommendedModules(module: Module, semesterNumberForModule: number, allSemesters: Semester[]): ModuleValidationInfo | null {
-    if(!module.recommendedModuleIds.length) {
+    if(module.recommendedModuleIds.length === 0) {
       return null;
     }
 
-    const missingOrLater = module.recommendedModuleIds
-      .map(moduleId =>
-        ({moduleId, semesterNumber: allSemesters.find(semester => semester.moduleIds.includes(moduleId))?.number})
-      )
-      .filter(({semesterNumber}) =>
-        !semesterNumber || semesterNumber > semesterNumberForModule
-      );
+    const missing = [];
+    const later = [];
+    for (const recommendedModuleId of module.recommendedModuleIds) {
+      const position = this.getPositionOfModuleInPlan(recommendedModuleId, allSemesters, semesterNumberForModule);
+      if (position === 'later') {
+        later.push(recommendedModuleId);
+      } else if(position === 'missing') {
+        missing.push(recommendedModuleId);
+      }
+    }
 
-    return {type: 'soft', tooltip: `Empfohlene Module ${missingOrLater.map(m => m.moduleId).join(',')}`};
+    if(missing.length == 0 && later.length == 0) {
+      return null;
+    }
+
+    const tooltipForMissing = missing.length ? `Nicht eingeplante, empfohlene Module: ${missing.join(', ')}` : '';
+    const tooltipForLater = later.length ? `Später eingeplante, empfohelen Module: ${later.join(', ')}` : '';
+
+    return { type: 'beforeRecommended', missingModuleIds: missing, laterModuleIds: later, severity: 'soft', tooltip: [tooltipForMissing, tooltipForLater].filter(f => f).join('\n')};
+  }
+
+  private static getPositionOfModuleInPlan(moduleId: string, allSemesters: Semester[], referenceSemesterNumber: number): 'sameOrEarlier' | 'later' | 'missing' {
+    const semesterNumberForModule = this.getSemesterNumberForModuleId(moduleId, allSemesters);
+    if(semesterNumberForModule) {
+      if (semesterNumberForModule <= referenceSemesterNumber) {
+        return 'sameOrEarlier';
+      }
+      if (semesterNumberForModule > referenceSemesterNumber) {
+        return 'later';
+      }
+    }
+
+    const successor = store.getters.modules.find(m => m.predecessorModuleId === moduleId);
+    if(!successor) {
+      return 'missing';
+    }
+    return this.getPositionOfModuleInPlan(successor.id, allSemesters, referenceSemesterNumber);
+  }
+
+
+  private static getSemesterNumberForModuleId(moduleId: string, allSemesters: Semester[]): number | undefined {
+    return allSemesters.find(sem => sem.moduleIds.includes(moduleId))?.number;
   }
 }
 

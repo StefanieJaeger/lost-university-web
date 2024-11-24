@@ -106,7 +106,7 @@ export const store = createStore({
     async loadModules (context) {
       const response = await fetch(`${BASE_URL}${ROUTE_MODULES}`);
       const json = await response.json();
-      const modules = json.map(m => new Module(m.id, m.name, m.url, m.categories_for_coloring, Number(m.ects), m.term, m.isDeactivated));
+      const modules = json.map(m => new Module(m.id, m.name, m.url, m.categoriesForColoring, Number(m.ects), m.term, m.recommendedModuleIds, m.dependentModuleIds, m.successorModuleId, m.predecessorModuleId, m.isDeactivated));
       context.commit('setModules', modules);
     },
     async loadCategories (context) {

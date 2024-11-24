@@ -20,18 +20,21 @@ export class Module {
   // null means there cannot be a next semester for this module (reached max semesters)
   nextPossibleSemester: SemesterInfo | null;
 
-  constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term, isDeactivated: boolean) {
+  // todo: make this cleaner
+  constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term, recommendedModuleIds: string[], dependentModuleIds: string[], successorModuleId: string, predecessorModuleId: string, isDeactivated: boolean) {
     this.id = id;
     this.name = name;
     this.url = url;
     this.categoriesForColoring = categoriesForColoring;
     this.ects = ects;
     this.term = term;
+    this.recommendedModuleIds = recommendedModuleIds;
+    this.dependentModuleIds = dependentModuleIds;
+    this.successorModuleId = successorModuleId;
+    this. predecessorModuleId = predecessorModuleId;
     this.isDeactivated = isDeactivated;
     this.validationInfo = null;
     this.nextPossibleSemester = null;
-    this.recommendedModuleIds = [];
-    this.dependentModuleIds = [];
   }
 
   calculateNextPossibleSemester(startSemester: SemesterInfo) {
