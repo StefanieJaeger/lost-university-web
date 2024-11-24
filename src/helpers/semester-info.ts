@@ -75,7 +75,8 @@ export class SemesterInfo {
     if(!startSemester) {
       return null;
     }
-    // todo: both and null!
+    // todo: return next semester for 'both'
+    // todo: return nothing for null
     const next = term === 'FS' ? SemesterInfo.nextSpringSemester() : SemesterInfo.nextAutumSemester();
     if(next.difference(startSemester) >= SemesterInfo.maxNumberOfAllowedSemesters) {
       return null;

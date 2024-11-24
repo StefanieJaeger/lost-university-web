@@ -101,7 +101,6 @@ export class StorageHelper {
       .split(this.URL_MODULE_SEPARATOR)
       .filter(moduleId => !(this.isNullOrWhitespace(moduleId)));
 
-    // todo: unknown are not in url, so alert is wrong
     // even if we cannot find a module, we might be able to find its successor, with which we will replace it
     return moduleIds.map((moduleId, index) => {
       if(!store.getters.modules.find(m => m.id === moduleId)) {

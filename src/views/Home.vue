@@ -22,7 +22,7 @@
       :text="'Folgende Module konnten nicht wiederhergestellt werden'"
       :show-toast="unknownModules?.length != 0"
       :list-items="unknownModules.map(u => `- ${u.id} in semester ${u.semesterNumber}`)"
-      :dismiss-button-text="'Alle aus URL entfernen'"
+      :dismiss-button-text="'OK'"
       @on-dismiss="removeUnknownModulesFromUrl"
     />
   </div>

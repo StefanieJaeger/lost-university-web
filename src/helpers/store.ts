@@ -93,14 +93,15 @@ export const store = createStore({
       state.semesters.splice(state.semesters.findIndex(f => f.number === semesterNumber), 1);
     },
     removeModuleFromSemester(state, data: {semesterNumber: number, moduleId: string}) {
-      console.log('removeModuleFromSemester')
       const semester = state.semesters.find(s => s.number === data.semesterNumber);
       const index = semester.moduleIds.findIndex(moduleId => moduleId === data.moduleId);
       semester.moduleIds.splice(index, 1);
     },
     addModuleToSemester(state, data: {semesterNumber: number, moduleId: string}) {
-      console.log('addModuleToSemester')
       state.semesters.find(s => s.number === data.semesterNumber).moduleIds.push(data.moduleId);
+    },
+    setModuleIdsForSemester(state, data: {semesterNumber: number, moduleIds: string[]}) {
+      state.semesters.find(s => s.number === data.semesterNumber).moduleIds = data.moduleIds;
     },
     updateNameOfAllSemesters(state) {
       state.semesters.forEach(s => s.setName(state.startSemester));

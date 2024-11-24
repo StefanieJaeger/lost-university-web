@@ -2,7 +2,7 @@
   <!-- todo: could store have messed up dragNDrop?-->
   <draggable
     class="gap-y-1 flex flex-col items-center"
-    :list="semester.modules"
+    v-model="modules"
     group="semester"
     item-key="id"
     :animation="200"
@@ -55,6 +55,7 @@ import ModuleComponent from './Module.vue';
 import { type PropType, defineComponent } from 'vue';
 import type { Module, Semester } from '../helpers/types';
 import ModuleSearch from './ModuleSearch.vue';
+import { store } from '../helpers/store';
 
 export default defineComponent({
   name: 'Semester',
@@ -78,6 +79,14 @@ export default defineComponent({
     getTotalEcts(): number {
       return this.countTotalEcts();
     },
+    modules: {
+      get() {
+        return this.semester.modules;
+      },
+      set(modules: Module[]) {
+        store.commit('setModuleIdsForSemester', {semesterNumber: this.semester.number, moduleIds: modules.map(m => m.id)});
+      }
+    }
   },
   methods: {
     addModule(name: string) {

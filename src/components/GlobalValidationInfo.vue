@@ -65,8 +65,9 @@ export default defineComponent({
       if(!semesterNumbers) {
         const semesterNumber = store.getters.semesters.find(sem => sem.moduleIds.includes(moduleId))?.number;
         store.commit('removeModuleFromSemester', {semesterNumber, moduleId});
+        return;
       }
-      for (const semesterNumber in semesterNumbers) {
+      for (const semesterNumber of semesterNumbers) {
         store.commit('removeModuleFromSemester', {semesterNumber, moduleId});
       }
       this.updateUrlFragment();

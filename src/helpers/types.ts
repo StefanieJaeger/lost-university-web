@@ -20,7 +20,6 @@ export class Module {
   // null means there cannot be a next semester for this module (reached max semesters)
   nextPossibleSemester: SemesterInfo | null;
 
-  // todo: make this cleaner
   constructor(id: string, name: string, url: string, categoriesForColoring: string[], ects: number, term: Term, recommendedModuleIds: string[], dependentModuleIds: string[], successorModuleId: string, predecessorModuleId: string, isDeactivated: boolean) {
     this.id = id;
     this.name = name;
