@@ -51,6 +51,10 @@ export default defineComponent({
     computedClasses() {
       const classesObj = { };
       classesObj[this.getCategoryColorClassForModule(this.module)] = true;
+      if (this.module.validationInfo?.severity === 'hard') {
+        classesObj['border-red-500'] = true;
+        classesObj['border-4'] = true;
+      }
       return classesObj;
     }
   },

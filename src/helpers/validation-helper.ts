@@ -75,8 +75,8 @@ export class ValidationHelper {
     if(occurences.length <= 1) {
       return null;
     }
-    const affectedSemesterNumbers = occurences.slice(1).map(m => m.semesterNumber);
-    return { type: 'duplicate', affectedSemesterNumbers, severity: 'hard', tooltip: `Modul is doppelt im Plan, in Semester ${occurences.map(m => m.semesterNumber).join(', ')}` };
+    const affectedSemesterNumbers = occurences.map(m => m.semesterNumber);
+    return { type: 'duplicate', affectedSemesterNumbers: affectedSemesterNumbers.slice(1), severity: 'hard', tooltip: `Modul is doppelt im Plan, in Semester ${affectedSemesterNumbers.join(', ')}` };
   }
 
   private static isModuleInactive(module: Module): boolean {
