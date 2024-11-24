@@ -1,5 +1,4 @@
 <template>
-  <!-- todo: could store have messed up dragNDrop?-->
   <draggable
     class="gap-y-1 flex flex-col items-center"
     v-model="modules"
@@ -40,6 +39,7 @@
         :modules="allModules"
         :show-next-possible-semester="false"
         :width-class="{'w-2/3': true}"
+        :term-for-which-to-search="term"
         @on-module-selected="(name: string) => addModule(name)"
       />
       <div class="mt-auto p-2">
@@ -53,9 +53,10 @@
 import draggable from 'vuedraggable';
 import ModuleComponent from './Module.vue';
 import { type PropType, defineComponent } from 'vue';
-import type { Module, Semester } from '../helpers/types';
+import type { Module, Semester, Term } from '../helpers/types';
 import ModuleSearch from './ModuleSearch.vue';
 import { store } from '../helpers/store';
+import { SemesterInfo } from '../helpers/semester-info';
 
 export default defineComponent({
   name: 'Semester',
@@ -86,6 +87,9 @@ export default defineComponent({
       set(modules: Module[]) {
         store.commit('setModuleIdsForSemester', {semesterNumber: this.semester.number, moduleIds: modules.map(m => m.id)});
       }
+    },
+    term(): Term {
+      return SemesterInfo.parse(this.semester.name)?.isSpringSemester ? 'FS' : 'HS';
     }
   },
   methods: {

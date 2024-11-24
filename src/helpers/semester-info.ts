@@ -21,14 +21,18 @@ export class SemesterInfo {
     return new SemesterInfo(isSpringSemester(now), now.getFullYear());
   }
 
-  static latestSpringSemester() {
-    const currentSemester = SemesterInfo.now();
-
-    if (currentSemester.isSpringSemester) {
-      return currentSemester;
+  static nextSemester(term: Term) {
+    switch (term) {
+      case 'both':
+        return SemesterInfo.now().plus(1);
+      case 'FS':
+        return new SemesterInfo(true, new Date().getFullYear() + 1);
+      case 'HS':
+        const now = new Date();
+        return new SemesterInfo(false, isSpringSemester(now) ? now.getFullYear() : now.getFullYear() + 1);
+      default:
+        return null;
     }
-
-    return currentSemester.minus(1);
   }
 
   static latestAutumnSemester() {
@@ -39,15 +43,6 @@ export class SemesterInfo {
     }
 
     return currentSemester.minus(1);
-  }
-
-  static nextSpringSemester() {
-    return new SemesterInfo(true, new Date().getFullYear() + 1);
-  }
-
-  static nextAutumSemester() {
-    const now = new Date();
-    return new SemesterInfo(false, isSpringSemester(now) ? now.getFullYear() : now.getFullYear() + 1);
   }
 
   static parse(text: string | undefined) {
@@ -75,12 +70,12 @@ export class SemesterInfo {
     if(!startSemester) {
       return null;
     }
-    // todo: return next semester for 'both'
-    // todo: return nothing for null
-    const next = term === 'FS' ? SemesterInfo.nextSpringSemester() : SemesterInfo.nextAutumSemester();
-    if(next.difference(startSemester) >= SemesterInfo.maxNumberOfAllowedSemesters) {
+
+    const next = SemesterInfo.nextSemester(term);
+    if(!next || next.difference(startSemester) >= SemesterInfo.maxNumberOfAllowedSemesters) {
       return null;
     }
+
     return next;
   }
 
