@@ -199,8 +199,7 @@ export default defineComponent({
           return;
         }
         let nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString())
-        // todo: detect, when we have reached 14 (max) and stop!
-        while(!nextSemester) {
+        while(!nextSemester && !this.addingSemesterIsDisabled) {
           this.addSemester();
           nextSemester = this.enrichedSemesters.find(s => s.name === module.nextPossibleSemester.toString());
         }
@@ -216,7 +215,6 @@ export default defineComponent({
       this.updateUrlFragment();
     },
     addSemester() {
-      // todo: validate, that not more than 14!!
       if(this.addingSemesterIsDisabled) {
         this.showErrorMsg(`Es können nicht mehr als ${SemesterInfo.maxNumberOfAllowedSemesters} Semester geplant werden!`);
         return;
