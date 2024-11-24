@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: could store have messed up dragNDrop?-->
   <draggable
     class="gap-y-1 flex flex-col items-center"
     :list="semester.modules"

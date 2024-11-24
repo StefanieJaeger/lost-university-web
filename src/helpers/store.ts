@@ -22,7 +22,8 @@ export const store = createStore({
   },
   getters: {
     modules: state => state.modules,
-    getModulesByIds: state => moduleIds => {
+    semesters: state => state.semesters,
+    modulesByIds: state => moduleIds => {
       return moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f);
     },
     totalPlannedCredits: () => getPlannedCredits(),
@@ -31,13 +32,17 @@ export const store = createStore({
     startSemester: state => state.startSemester,
     studienordnung: state => state.studienordnung,
     validationEnabled: state => state.validationEnabled,
+    numberOfHardValidationProblems: state => state.modules.map(m => m.validationInfo).filter(f => f?.severity === 'hard').length,
+    hardValidationProblemsByType: state => type => {
+      return state.modules.map(m => m.validationInfo).filter(f => f?.severity === 'hard' && f?.type === type);
+    },
     enrichedCategories: (state, getters) => {
       return state.categories.map(category => ({
         ...category,
         earnedEcts: getEarnedCredits(category),
         plannedEcts: getPlannedCredits(category),
         colorClass: getColorClassForCategoryId(category.id),
-        modules: getters.getModulesByIds(category.moduleIds),
+        modules: getters.modulesByIds(category.moduleIds),
       }));
     },
     enrichedFocuses: (state, getters) => {
@@ -46,14 +51,14 @@ export const store = createStore({
       return state.focuses.map(focus => ({
         ...focus,
         numberOfMissingModules: Math.max(0, numberOfModulesRequiredToGetFocus - focus.moduleIds.filter(moduleId => plannedModuleIds.includes(moduleId)).length),
-        availableModules: getters.getModulesByIds(focus.moduleIds.filter(moduleId => !plannedModuleIds.includes(moduleId))),
-        modules: getters.getModulesByIds(focus.moduleIds),
+        availableModules: getters.modulesByIds(focus.moduleIds.filter(moduleId => !plannedModuleIds.includes(moduleId))),
+        modules: getters.modulesByIds(focus.moduleIds),
       }));
     },
     enrichedSemesters: (state, getters) => {
       return state.semesters.map(semester => ({
         ...semester,
-        modules: getters.getModulesByIds(semester.moduleIds),
+        modules: getters.modulesByIds(semester.moduleIds),
       }));
     },
   },
@@ -88,11 +93,13 @@ export const store = createStore({
       state.semesters.splice(state.semesters.findIndex(f => f.number === semesterNumber), 1);
     },
     removeModuleFromSemester(state, data: {semesterNumber: number, moduleId: string}) {
+      console.log('removeModuleFromSemester')
       const semester = state.semesters.find(s => s.number === data.semesterNumber);
       const index = semester.moduleIds.findIndex(moduleId => moduleId === data.moduleId);
       semester.moduleIds.splice(index, 1);
     },
     addModuleToSemester(state, data: {semesterNumber: number, moduleId: string}) {
+      console.log('addModuleToSemester')
       state.semesters.find(s => s.number === data.semesterNumber).moduleIds.push(data.moduleId);
     },
     updateNameOfAllSemesters(state) {
@@ -101,6 +108,13 @@ export const store = createStore({
     updateNextPossibleSemesterOfAllModules(state) {
       state.modules.forEach(m => m.calculateNextPossibleSemester(state.startSemester))
     },
+    updateValidationInfoOfAllModules(state, enrichedSemesters: Semester[]) {
+      if(state.validationEnabled) {
+        state.modules.forEach(module => module.validateModule(enrichedSemesters));
+      } else {
+        state.modules.forEach(module => module.validationInfo = null);
+      }
+    }
   },
   actions: {
     async loadModules (context) {
@@ -130,7 +144,6 @@ export const store = createStore({
         context.commit('setStudienordnung', '21');
       }
 
-      // todo: these are called, even if studienordnung stays the same...
       await store.dispatch('loadCategories');
       await store.dispatch('loadFocuses');
 
@@ -139,10 +152,7 @@ export const store = createStore({
       store.dispatch('updateValidationInfoOfAllModules');
     },
     updateValidationInfoOfAllModules(context) {
-      if(context.getters.validationEnabled) {
-        // todo: should we only validate those, that are in a semester?
-        context.getters.modules.forEach(module => module.validateModule(context.getters.enrichedSemesters));
-      }
+      context.commit('updateValidationInfoOfAllModules', context.getters.enrichedSemesters);
     },
   }
 });

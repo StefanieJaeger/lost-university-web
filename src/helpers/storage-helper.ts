@@ -11,20 +11,6 @@ export class StorageHelper {
   private static readonly URL_START_SEMESTER_KEY = 'startSemester';
   private static readonly URL_VALIDATION_ENABLED_KEY = 'validation';
 
-  // todo: write short explaination, what these modules are!
-  private static readonly MODULE_REPLACEMENT_MAP: {[key: string]: string} = {
-    'BuPro': 'WI2',
-    'RheKI': 'RheKoI',
-    'SDW': 'IBN',
-    'FunProg': 'FP',
-    'BAI14': 'BAI21',
-    'SE1': 'SEP1',
-    'SE2': 'SEP2',
-    'NISec': 'NIoSec',
-    'PFSec': 'PlFSec',
-    'WIoT': 'WsoT',
-  }
-
   static getDataFromUrlHash(urlHash: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): [Semester[], SemesterInfo | undefined, boolean] {
       const planIndicator = `#/${this.URL_PLAN_KEY}/`;
 
@@ -37,11 +23,7 @@ export class StorageHelper {
       }
 
       if (urlHash.startsWith(planIndicator)) {
-        // This ensures backwards compatability. Removing it after everyone who started before 2022
-        // has finished their studies, so about 2026, is guaranteed to be fine.
-        const cleanedHash = Object.keys(this.MODULE_REPLACEMENT_MAP).reduce((result, key) => result.replace(key, this.MODULE_REPLACEMENT_MAP[key]), urlHash);
-
-        const [ hash, query ] = cleanedHash.split('?');
+        const [ hash, query ] = urlHash.split('?');
 
         let newStartSemester = undefined;
         let validation = true;
@@ -57,28 +39,39 @@ export class StorageHelper {
           validation = validationQueryParameter === 'false' ? false : true;
         }
 
-        const planData = hash
+        const newSemesters = hash
           .slice(planIndicator.length)
           .split(this.URL_SEMESTER_SEPARATOR)
           .map((semesterPart, index) =>
             new Semester(index + 1, this.getModuleIdsFromSemesterPart(semesterPart, unknownModuleCallback)).setName(newStartSemester)
           );
 
-        if (cleanedHash !== urlHash) {
-          window.location.hash = cleanedHash;
+        const newestHash = `${planIndicator}${this.turnPlanDataIntoUrlHash(newSemesters, newStartSemester, validation)}`;
+        if (urlHash !== newestHash) {
+          window.location.hash = newestHash;
         }
 
-        this.savePlanInLocalStorage(cleanedHash);
+        this.savePlanInLocalStorage(newestHash);
 
-        return [planData, newStartSemester, validation];
+        return [newSemesters, newStartSemester, validation];
       }
 
       return [[], undefined, true];
   }
 
   static updateUrlFragment(semesters: Semester[], startSemester: SemesterInfo, validationEnabled: boolean) {
+    const plan = this.turnPlanDataIntoUrlHash(semesters, startSemester, validationEnabled);
+
+    window.location.hash = `/${this.URL_PLAN_KEY}/${plan}`;
+
+    if (plan) {
+      this.savePlanInLocalStorage(window.location.hash);
+    }
+  }
+
+  private static turnPlanDataIntoUrlHash(semesters: Semester[], startSemester: SemesterInfo | undefined, validationEnabled: boolean): string {
     let plan = semesters
-      .map((semester) => semester.modules.map((module) => module.id).join(this.URL_MODULE_SEPARATOR))
+      .map((semester) => semester.moduleIds.join(this.URL_MODULE_SEPARATOR))
       .join(this.URL_SEMESTER_SEPARATOR);
 
     const query = [];
@@ -92,11 +85,7 @@ export class StorageHelper {
       plan += `?${query.join('&')}`;
     }
 
-    window.location.hash = `/${this.URL_PLAN_KEY}/${plan}`;
-
-    if (plan) {
-      this.savePlanInLocalStorage(window.location.hash);
-    }
+    return plan;
   }
 
   private static savePlanInLocalStorage(path: string) {
@@ -113,13 +102,17 @@ export class StorageHelper {
       .filter(moduleId => !(this.isNullOrWhitespace(moduleId)));
 
     // todo: unknown are not in url, so alert is wrong
-    // todo: should we remove id from list?
-    moduleIds.forEach((moduleId, index) => {
+    // even if we cannot find a module, we might be able to find its successor, with which we will replace it
+    return moduleIds.map((moduleId, index) => {
       if(!store.getters.modules.find(m => m.id === moduleId)) {
-        unknownModuleCallback?.(index + 1, moduleId);
+        const successorModuleId = store.getters.modules.find(m => m.predecessorModuleId === moduleId)?.id;
+        if(!successorModuleId) {
+          unknownModuleCallback?.(index + 1, moduleId);
+          return null;
+        }
+        return successorModuleId;
       }
-    });
-
-    return moduleIds;
+      return moduleId;
+    }).filter(f => f).map(m => m!);
   }
 }

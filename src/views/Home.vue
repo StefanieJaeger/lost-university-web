@@ -1,13 +1,14 @@
 <template>
-  <div class="fixed top-2 right-2 z-40">
-    <SwitchGroup>
+  <div class="fixed top-2 right-2 z-40 flex items-start pt-3 w-1/3">
+    <SwitchGroup class="pt-2 ml-auto">
       <div class="flex items-center">
         <SwitchLabel class="mr-4">Validierung:</SwitchLabel>
-        <Switch :modelValue="validationEnabled" @update:modelValue="setValidationEnabled" :class="validationEnabled ? 'bg-teal-900' : 'bg-teal-700'" class="relative inline-flex h-6 w-11 items-center rounded-full">
+        <Switch :modelValue="validationEnabled" @update:modelValue="setValidationEnabled" :class="validationEnabled ? 'bg-teal-700' : 'bg-gray-500'" class="relative inline-flex h-6 w-11 items-center rounded-full">
           <span aria-hidden="true" :class="validationEnabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
         </Switch>
       </div>
     </SwitchGroup>
+    <GlobalValidationInfo></GlobalValidationInfo>
   </div>
   <div class="fixed top-2 right-2 z-50">
     <ToastNotification
@@ -118,11 +119,12 @@ import Categories from '../components/Categories.vue';
 import { StorageHelper } from '../helpers/storage-helper';
 import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
 import { store } from '../helpers/store';
-import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex';
+import GlobalValidationInfo from '../components/GlobalValidationInfo.vue';
 
 export default defineComponent({
   name: 'Home',
-  components: { SemesterComponent, FocusComponent,  ToastNotification, Categories, Switch, SwitchGroup, SwitchLabel },
+  components: { SemesterComponent, FocusComponent,  ToastNotification, Categories, Switch, SwitchGroup, SwitchLabel, GlobalValidationInfo },
   data() {
     return {
       selectableStartSemesters: SemesterInfo.selectableStartSemesters,

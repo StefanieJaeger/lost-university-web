@@ -22,7 +22,7 @@
       </option>
       <option
         v-for="selectableModule in modules"
-        :key="selectableModule.name"
+        :key="selectableModule.id"
         :value="selectableModule.name"
       >
         {{ selectableModule.name }}
