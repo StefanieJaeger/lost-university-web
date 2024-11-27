@@ -169,7 +169,10 @@ export class ValidationHelper {
     const missing = [];
     const later = [];
     for (const recommendedModuleId of module.recommendedModuleIds) {
-      const {position, moduleIdForPosition} = this.getPositionOfModuleInPlan(recommendedModuleId, allSemesters, semesterNumberForModule);
+      const {position, moduleIdForPosition} = this.getPositionOfModuleInPlan(
+        recommendedModuleId,
+        allSemesters,
+        semesterNumberForModule);
       if (position === 'later') {
         later.push(moduleIdForPosition);
       } else if(position === 'missing') {
