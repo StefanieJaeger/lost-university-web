@@ -169,11 +169,11 @@ export class ValidationHelper {
     const missing = [];
     const later = [];
     for (const recommendedModuleId of module.recommendedModuleIds) {
-      const position = this.getPositionOfModuleInPlan(recommendedModuleId, allSemesters, semesterNumberForModule);
+      const {position, moduleIdForPosition} = this.getPositionOfModuleInPlan(recommendedModuleId, allSemesters, semesterNumberForModule);
       if (position === 'later') {
-        later.push(recommendedModuleId);
+        later.push(moduleIdForPosition);
       } else if(position === 'missing') {
-        missing.push(recommendedModuleId);
+        missing.push(moduleIdForPosition);
       }
     }
 
@@ -195,20 +195,20 @@ export class ValidationHelper {
     moduleId: string,
     allSemesters: Semester[],
     referenceSemesterNumber: number
-  ): 'sameOrEarlier' | 'later' | 'missing' {
+  ): { position: 'sameOrEarlier' | 'later' | 'missing', moduleIdForPosition: string } {
     const semesterNumberForModule = this.getSemesterNumberForModuleId(moduleId, allSemesters);
     if(semesterNumberForModule) {
       if (semesterNumberForModule <= referenceSemesterNumber) {
-        return 'sameOrEarlier';
+        return { position: 'sameOrEarlier', moduleIdForPosition: moduleId};
       }
       if (semesterNumberForModule > referenceSemesterNumber) {
-        return 'later';
+        return { position: 'later', moduleIdForPosition: moduleId };
       }
     }
 
     const successor = store.getters.modules.find(m => m.predecessorModuleId === moduleId);
     if(!successor) {
-      return 'missing';
+      return { position: 'missing', moduleIdForPosition: moduleId };
     }
     return this.getPositionOfModuleInPlan(successor.id, allSemesters, referenceSemesterNumber);
   }

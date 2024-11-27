@@ -24,7 +24,7 @@
         v-for="selectableModule in modules"
         :key="selectableModule.id"
         :value="selectableModule.name"
-        :disabled="moduleIsInPlan(selectableModule) || moduleHasWrongTerm(selectableModule)"
+        :disabled="moduleIsInPlan(selectableModule) || moduleHasWrongTerm(selectableModule) || (showNextPossibleSemester && !selectableModule.nextPossibleSemester)"
       >
         {{ selectableModule.name }}
         <span v-if="moduleIsInPlan(selectableModule)">
