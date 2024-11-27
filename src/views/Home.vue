@@ -194,7 +194,6 @@ export default defineComponent({
       store.commit('setValidationEnabled', validationEnabled);
       this.updateUrlFragment();
     },
-    sumCredits: (previousTotal: number, module: Module) => previousTotal + module.ects,
     getPlanDataFromUrl() {
       const [
         semesters,

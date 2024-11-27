@@ -25,8 +25,8 @@ export const store = createStore({
     semesters: state => state.semesters,
     modulesByIds: state => moduleIds =>
       moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f),
-    totalPlannedCredits: () => getPlannedCredits(),
-    totalEarnedCredits: () => getEarnedCredits(),
+    totalPlannedEcts: () => getPlannedEcts(),
+    totalEarnedEcts: () => getEarnedEcts(),
     plannedModuleIds: state => state.semesters.flatMap(semester => semester.moduleIds),
     startSemester: state => state.startSemester,
     studienordnung: state => state.studienordnung,
@@ -38,8 +38,8 @@ export const store = createStore({
     enrichedCategories: (state, getters) =>
       state.categories.map(category => ({
         ...category,
-        earnedEcts: getEarnedCredits(category),
-        plannedEcts: getPlannedCredits(category),
+        earnedEcts: getEarnedEcts(category),
+        plannedEcts: getPlannedEcts(category),
         colorClass: getColorClassForCategoryId(category.id),
         modules: getters.modulesByIds(category.moduleIds),
       })),
@@ -176,7 +176,7 @@ export const store = createStore({
   }
 });
 
-function getEarnedCredits(category?: Category): number {
+function getEarnedEcts(category?: Category): number {
   if (store.getters.startSemester === undefined) {
     return 0;
   }
@@ -193,7 +193,7 @@ function getEarnedCredits(category?: Category): number {
     .reduce((previousTotal, module) => previousTotal + module.ects, 0);
 }
 
-function getPlannedCredits(category?: Category): number {
+function getPlannedEcts(category?: Category): number {
   if (store.getters.startSemester === undefined) {
     return 0;
   }

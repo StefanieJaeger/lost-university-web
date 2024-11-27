@@ -34,8 +34,8 @@
         <td class="pt-3">
           <BeautifulProgressIndicator
             :required="180"
-            :earned="totalEarnedCredits"
-            :planned="totalPlannedCredits"
+            :earned="totalEarnedEcts"
+            :planned="totalPlannedEcts"
             :color-class="'bg-amber-600'"
           />
         </td>
@@ -55,7 +55,7 @@ export default defineComponent({
   components: {BeautifulProgressIndicator, ModuleSearch},
   emits: ['on-add-module'],
   computed: {
-    ...mapGetters(['enrichedCategories', 'totalPlannedCredits', 'totalEarnedCredits']),
+    ...mapGetters(['enrichedCategories', 'totalPlannedEcts', 'totalEarnedEcts']),
   },
   methods: {
     addModule(name: string) {
