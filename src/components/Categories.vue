@@ -2,7 +2,7 @@
   <table>
     <tbody>
       <tr
-        v-for="category in categories"
+        v-for="category in enrichedCategories"
         :key="category.name"
       >
         <td class="align-bottom pr-4 text-end">
@@ -11,15 +11,15 @@
         <td class="pt-3">
           <BeautifulProgressIndicator
             :required="category.requiredEcts"
-            :earned="category.earnedCredits"
-            :planned="category.plannedCredits"
+            :earned="category.earnedEcts"
+            :planned="category.plannedEcts"
             :color-class="category.colorClass"
           />
         </td>
         <td class="align-bottom pl-4">
           <div class="w-20">
             <ModuleSearch
-              :modules="category.modules"
+              :category-id="category.id"
               :show-next-possible-semester="true"
               :width-class="{'w-10': true}"
               @on-module-selected="(name: string) => addModule(name)"
@@ -46,46 +46,20 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Category } from '../helpers/types';
 import BeautifulProgressIndicator from './BeautifulProgressIndicator.vue';
 import ModuleSearch from './ModuleSearch.vue';
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   name: 'Categories',
   components: {BeautifulProgressIndicator, ModuleSearch},
-  props: {
-    categories: {
-      type: Array<Category>,
-      required: true,
-    },
-    totalEarnedEcts: {
-      type: Number,
-      required: true
-    },
-    totalPlannedEcts: {
-      type: Number,
-      required: true
-    },
-  },
   emits: ['on-add-module'],
-  // data() {
-  //   return {
-  //     isSearching: false,
-  //     searchId: Math.random(),
-  //   };
-  // },
-  // watch: {
-  //   modules: {
-  //     deep: true,
-  //     immediate: false,
-  //     handler() {
-  //       this.isSearching = false;
-  //     },
-  //   },
-  // },
+  computed: {
+    ...mapGetters(['enrichedCategories', 'totalPlannedEcts', 'totalEarnedEcts']),
+  },
   methods: {
     addModule(name: string) {
-      this.$emit('on-add-module', name, this.number);
+      this.$emit('on-add-module', name);
     },
   },
 });
