@@ -204,11 +204,13 @@ export default defineComponent({
       this.groupedModules = [...this.groupedModules];
     },
     filteredModulesByGroup(groupId: string) {
-      return this.query === ''
-      ? this.groupedModules.find(f => f.id === groupId).modules
-      : this.groupedModules.find(f => f.id === groupId).modules.filter((module) => {
-          return module.name.toLowerCase().includes(this.query.toLowerCase());
-        });
+      const group = this.groupedModules.find(f => f.id === groupId);
+      if (this.query === '') {
+        return group?.modules;
+      }
+      return group?.modules.filter((module) => {
+        return module.name.toLowerCase().includes(this.query.toLowerCase()) || module.id.toLowerCase().includes(this.query.toLowerCase());
+      })
     },
   },
 });
