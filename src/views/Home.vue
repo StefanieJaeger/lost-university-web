@@ -43,7 +43,6 @@
       :key="semester.number"
       class="bg-gray-200 rounded p-2 group/semester w-64 min-w-64"
       :semester="semester"
-      :all-modules="modules"
       @on-module-deleted="(moduleId: string) => removeModule(semester.number, moduleId)"
       @on-add-module="addModule"
       @on-remove-semester="removeSemester"
@@ -127,7 +126,7 @@ import { defineComponent } from 'vue';
 import SemesterComponent from '../components/Semester.vue';
 import FocusComponent from '../components/Focus.vue';
 import ToastNotification from '../components/ToastNotification.vue';
-import { Module, UnknownModule} from '../helpers/types';
+import { UnknownModule} from '../helpers/types';
 import { SemesterInfo } from "../helpers/semester-info";
 import Categories from '../components/Categories.vue';
 import { StorageHelper } from '../helpers/storage-helper';

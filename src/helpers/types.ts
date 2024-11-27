@@ -49,7 +49,7 @@ export class Module {
   }
 
   calculateNextPossibleSemester(startSemester: SemesterInfo) {
-    this.nextPossibleSemester = SemesterInfo.getNextPossibleSemesterForModule(this.term, startSemester);
+    this.nextPossibleSemester = SemesterInfo.getNextPossibleSemesterForTerm(this.term, startSemester);
   }
 
   validateModule(allSemesters: Semester[]) {

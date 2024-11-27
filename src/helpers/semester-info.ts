@@ -67,7 +67,7 @@ export class SemesterInfo {
     }
   }
 
-  static getNextPossibleSemesterForModule(term: Term, startSemester: SemesterInfo | undefined): SemesterInfo | null {
+  static getNextPossibleSemesterForTerm(term: Term, startSemester: SemesterInfo | undefined): SemesterInfo | null {
     if(!startSemester) {
       return null;
     }
