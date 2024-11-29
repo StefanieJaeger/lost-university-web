@@ -209,7 +209,8 @@ export default defineComponent({
         return group?.modules;
       }
       return group?.modules.filter((module) => {
-        return module.name.toLowerCase().includes(this.query.toLowerCase()) || module.id.toLowerCase().includes(this.query.toLowerCase());
+        return module.name.toLowerCase().includes(this.query.toLowerCase()) ||
+          module.id.toLowerCase().includes(this.query.toLowerCase());
       })
     },
   },
