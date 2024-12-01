@@ -15,10 +15,10 @@
     <Combobox
       :model-value="modelValue"
       by="id"
-      @update:model-value="value => selectModule(value)"
       nullable
+      @update:model-value="value => selectModule(value)"
     >
-      <div class="relative w-full h-8 overflow-hidden rounded-t-lg shadow-md flex items-center" >
+      <div class="relative w-full h-8 overflow-hidden rounded-t-lg shadow-md flex items-center">
         <ComboboxInput
           class="relative w-full border-none text-sm py-2 pl-3 pr-10 bg-gray-100"
           :display-value="(e) => e?.id"
@@ -81,7 +81,7 @@
                 >
                   geplant
                 </span>
-                <span v-else-if="module.isDeactivated">
+                <span v-else-if="module.isDeactivated && disableBasedOnTerm">
                   inaktiv
                 </span>
                 <span v-else>
@@ -93,7 +93,7 @@
                 <span v-if="showNextPossibleSemester && module.nextPossibleSemester">
                   ({{ module.nextPossibleSemester }})
                 </span>
-                <span v-else-if="moduleHasWrongTerm(module)">
+                <span v-else-if="moduleHasWrongTerm(module) && disableBasedOnTerm">
                   nur im {{ module.term }}
                 </span>
                 <span v-else>
@@ -143,6 +143,11 @@ export default defineComponent({
       type: String as () => Term,
       required: false,
       default: 'both'
+    },
+    disableBasedOnTerm: {
+      type: Boolean,
+      required: false,
+      default: true,
     }
   },
   emits: ['on-module-selected'],
@@ -159,13 +164,16 @@ export default defineComponent({
     moduleIsDisabled(module: Module): boolean {
       return this.moduleIsInPlan(module) ||
         this.moduleHasWrongTerm(module) ||
-        (this.showNextPossibleSemester && !module.nextPossibleSemester)
+        (this.showNextPossibleSemester && !module.nextPossibleSemester);
     },
     moduleIsInPlan(module: Module): boolean {
       return store.getters.allPlannedModuleIds.includes(module.id);
     },
     moduleHasWrongTerm(module: Module): boolean {
-      if(this.termForWhichToSearch !== 'both' && module.term !== 'both') {
+      if (!this.disableBasedOnTerm) {
+        return false;
+      }
+      if (this.termForWhichToSearch !== 'both' && module.term !== 'both') {
         return this.termForWhichToSearch !== module.term;
       }
       return false;

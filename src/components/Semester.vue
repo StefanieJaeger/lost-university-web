@@ -39,6 +39,7 @@
         :show-next-possible-semester="false"
         :width-class="'w-2/3'"
         :term-for-which-to-search="term"
+        :disable-based-on-term="!isInPast"
         @on-module-selected="(name: string) => addModule(name)"
       />
       <div class="mt-auto p-2">
@@ -88,6 +89,9 @@ export default defineComponent({
     },
     term(): Term {
       return SemesterInfo.parse(this.semester.name)?.isSpringSemester ? 'FS' : 'HS';
+    },
+    isInPast(): boolean {
+      return SemesterInfo.parse(this.semester.name)?.difference(SemesterInfo.now()) < 0;
     }
   },
   methods: {

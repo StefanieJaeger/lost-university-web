@@ -1,5 +1,9 @@
 <template>
-  <div class="relative flex justify-between px-4 rounded text-white group/module" :class="computedClasses" :title="tooltip">
+  <div
+    class="relative flex justify-between px-4 rounded text-white group/module"
+    :class="computedClasses"
+    :title="tooltip"
+  >
     <div class="grid grid-cols-[minmax(0,_auto)_auto_auto] gap-2">
       <span class="">{{ accreditedModule.name }}</span>
       <span>-</span>
@@ -51,7 +55,9 @@ export default defineComponent({
         return this.accreditedModule.validationInfo.tooltip;
       }
 
-      const categoryNames = this.accreditedModule.categoryIds.map(id => store.getters.categories.find(c => c.id === id)?.name).join(', ');
+      const categoryNames = this.accreditedModule.categoryIds
+        .map(id => store.getters.categories.find(c => c.id === id)?.name)
+        .join(', ');
       return `${this.accreditedModule.name} - ${this.accreditedModule.ects} - ${categoryNames}`;
     }
   },

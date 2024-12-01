@@ -2,11 +2,20 @@
   <div class="grid grid-cols-[min-content_auto] gap-2">
     <div class="grid grid-rows-2">
       <span>Übertrittsmodule</span>
-       <AccreditedModulesModal/>
+      <AccreditedModulesModal />
     </div>
-    <div v-if="accreditedModules.length" class="flex flex-wrap">
-      <div v-for="accreditedModule in accreditedModules" class="mr-2 mb-2">
-        <AccreditedModuleBadge :accredited-module="accreditedModule" @on-remove-clicked="removeAccreditedModule(accreditedModule)" />
+    <div
+      v-if="accreditedModules.length"
+      class="flex flex-wrap"
+    >
+      <div
+        v-for="accreditedModule in accreditedModules"
+        class="mr-2 mb-2"
+      >
+        <AccreditedModuleBadge
+          :accredited-module="accreditedModule"
+          @on-remove-clicked="removeAccreditedModule(accreditedModule)"
+        />
       </div>
     </div>
   </div>
