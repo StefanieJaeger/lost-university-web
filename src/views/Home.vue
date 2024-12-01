@@ -216,7 +216,6 @@ export default defineComponent({
       store.dispatch('setStartSemester', startSemester).then(() => this.updateUrlFragment());
     },
     updateUrlFragment() {
-      // StorageHelper.updateUrlFragment(this.enrichedSemesters, this.accreditedModules, this.startSemester, this.validationEnabled);
       StorageHelper.updateUrlFragment();
     },
     getPlannedSemesterForModule(moduleName: string): number | undefined {
