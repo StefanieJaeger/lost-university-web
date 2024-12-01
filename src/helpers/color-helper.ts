@@ -1,5 +1,3 @@
-import type { Module } from '../helpers/types';
-
 const CATEGORY_COLOR_CLASS_MAP: { [key: string]: string } = {
   Auf: 'bg-neutral-500',
   MaPh: 'bg-sky-700',

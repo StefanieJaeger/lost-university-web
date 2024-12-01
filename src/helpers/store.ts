@@ -30,7 +30,10 @@ export const store = createStore({
       moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f),
     totalPlannedEcts: () => getPlannedEcts(),
     totalEarnedEcts: () => getEarnedEcts(),
-    allPlannedModuleIds: state => state.semesters.flatMap(semester => semester.moduleIds).concat(state.accreditedModules.map(m => m.moduleId)).filter(id => id),
+    allPlannedModuleIds: state => state.semesters
+      .flatMap(semester => semester.moduleIds)
+      .concat(state.accreditedModules.map(m => m.moduleId))
+      .filter(id => id),
     startSemester: state => state.startSemester,
     studienordnung: state => state.studienordnung,
     validationEnabled: state => state.validationEnabled,

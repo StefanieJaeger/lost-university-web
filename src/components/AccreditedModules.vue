@@ -10,6 +10,7 @@
     >
       <div
         v-for="accreditedModule in accreditedModules"
+        :key="accreditedModule"
         class="mr-2 mb-2"
       >
         <AccreditedModuleBadge

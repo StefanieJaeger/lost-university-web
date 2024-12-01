@@ -27,7 +27,10 @@ export class AccreditedModule {
   }
 
   validateModule(allSemesters: Semester[], allAccreditedModules: AccreditedModule[]) {
-    this.validationInfo = ValidationHelper.getValidationInfoForAccreditedModule(this, allSemesters, allAccreditedModules);
+    this.validationInfo = ValidationHelper.getValidationInfoForAccreditedModule(
+      this, allSemesters,
+      allAccreditedModules
+    );
   }
 }
 

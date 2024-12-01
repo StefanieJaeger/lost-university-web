@@ -7,7 +7,7 @@
     +
   </button>
 
-  <Dialog
+  <DialogComponent
     class="relative z-10"
     :open="modalIsOpen"
     @close="closeModal"
@@ -54,7 +54,10 @@
                     </div>
                     <div>
                       <ul>
-                        <li v-for="selectedModule in selectedModules">
+                        <li
+                          v-for="selectedModule in selectedModules"
+                          :key="selectedModule.id"
+                        >
                           {{ selectedModule.name }}
                         </li>
                       </ul>
@@ -148,6 +151,7 @@
               <div class="flex flex-wrap ml-1">
                 <div
                   v-for="accreditedModule in accreditedModules"
+                  :key="accreditedModule"
                   class="m-1"
                 >
                   <AccreditedModuleBadge
@@ -169,13 +173,13 @@
         </DialogPanel>
       </div>
     </div>
-  </Dialog>
+  </DialogComponent>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import {
-  Dialog,
+  Dialog as DialogComponent,
   DialogPanel,
   TabGroup,
   TabList,
@@ -192,7 +196,7 @@ import AccreditedModuleBadge from './AccreditedModuleBadge.vue';
 export default defineComponent({
   name: 'AccreditedModulesModal',
   components: {
-    Dialog,
+    DialogComponent,
     DialogPanel,
     TabGroup,
     TabList,
@@ -243,11 +247,17 @@ export default defineComponent({
     },
     addExternalEcts() {
       if(this.externalName && this.externalEcts && this.externalCategories.length) {
-        if(this.externalName.match(/[\.\-\_\~]/g)) {
+        if(this.externalName.match(/[.\-_~]/g)) {
           console.error('".", "-", "_" and "~" not allowed in name');
           return;
         }
-        this.accreditedModules.push(AccreditedModule.createFromExternalData(this.externalName, this.externalEcts, this.externalCategories.map(c => c.id)));
+        this.accreditedModules.push(
+          AccreditedModule.createFromExternalData(
+            this.externalName,
+            this.externalEcts,
+            this.externalCategories.map(c => c.id)
+          )
+        );
         this.externalName = '';
         this.externalEcts = 0;
         this.externalCategories = [];

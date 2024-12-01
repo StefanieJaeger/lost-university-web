@@ -27,9 +27,19 @@ export class StorageHelper {
       }
 
       if (urlHash.startsWith(this.URL_PLAN_INDICATOR)) {
-        const [newSemesters, accreditedModules, newStartSemester, validation] = this.getPlanDataFromUrlHash(urlHash, unknownModuleCallback);
+        const [
+          newSemesters,
+          accreditedModules,
+          newStartSemester,
+          validation
+        ] = this.getPlanDataFromUrlHash(urlHash, unknownModuleCallback);
 
-        const hashFromNewSemesters = this.getUrlHashFromPlanData(newSemesters, accreditedModules, newStartSemester, validation);
+        const hashFromNewSemesters = this.getUrlHashFromPlanData(
+          newSemesters,
+          accreditedModules,
+          newStartSemester,
+          validation
+        );
         const newestHash = `${this.URL_PLAN_INDICATOR}${hashFromNewSemesters}`;
         if (urlHash !== newestHash) {
           window.location.hash = newestHash;
@@ -71,7 +81,10 @@ export class StorageHelper {
         .map(m =>
           m.moduleId ?
             m.moduleId :
-            encodeURIComponent([m.name, m.ects, m.categoryIds.join('~')].join(this.URL_ACCREDITED_MODULE_INFO_SEPARATOR)))
+            encodeURIComponent(
+              [m.name, m.ects, m.categoryIds.join('~')]
+              .join(this.URL_ACCREDITED_MODULE_INFO_SEPARATOR))
+            )
         .join(this.URL_MODULE_SEPARATOR);
     }
 
@@ -119,7 +132,10 @@ export class StorageHelper {
     }).filter(f => f).map(m => m!);
   }
 
-  private static getPlanDataFromUrlHash(urlHash: string, unknownModuleCallback: (semesterNumber: number, moduleId: string) => void): [Semester[], AccreditedModule[], SemesterInfo | undefined, boolean]{
+  private static getPlanDataFromUrlHash(
+    urlHash: string,
+    unknownModuleCallback: (semesterNumber: number, moduleId: string) => void
+  ): [Semester[], AccreditedModule[], SemesterInfo | undefined, boolean]{
     const [ hash, query ] = urlHash.split('?');
 
     let newStartSemester = undefined;
@@ -154,7 +170,10 @@ export class StorageHelper {
     const modulesInfo = accreditedHashPart
       .split(this.URL_MODULE_SEPARATOR)
       .filter(modulesInfo => !this.isNullOrWhitespace(modulesInfo))
-      .map(modulesInfo => modulesInfo.split(this.URL_ACCREDITED_MODULE_INFO_SEPARATOR).filter(moduleInfo => !this.isNullOrWhitespace(moduleInfo)));
+      .map(modulesInfo => modulesInfo
+        .split(this.URL_ACCREDITED_MODULE_INFO_SEPARATOR)
+        .filter(moduleInfo => !this.isNullOrWhitespace(moduleInfo))
+      );
 
     const accreditedModules = modulesInfo.map(moduleInfo => {
       if(moduleInfo.length === 3) {

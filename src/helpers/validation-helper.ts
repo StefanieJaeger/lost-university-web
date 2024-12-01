@@ -29,7 +29,11 @@ export type ModuleValidationInfo = {
 } & ModuleValidationGlobalInfo;
 
 export class ValidationHelper {
-  static getValidationInfoForModule(module: Module, allSemesters: Semester[], allAccreditedModules: AccreditedModule[]): ModuleValidationInfo | null {
+  static getValidationInfoForModule(
+    module: Module,
+    allSemesters: Semester[],
+    allAccreditedModules: AccreditedModule[]
+  ): ModuleValidationInfo | null {
     const alreadyInPlanValidationInfo = this.getValidationInfoForModuleAlreadyInPlan(module.id, allSemesters);
     if (alreadyInPlanValidationInfo) {
       return alreadyInPlanValidationInfo;
@@ -107,7 +111,11 @@ export class ValidationHelper {
     return null;
   }
 
-  static getValidationInfoForAccreditedModule(accreditedModule: AccreditedModule, allSemesters: Semester[], allAccreditedModules: AccreditedModule[]): ModuleValidationInfo | null {
+  static getValidationInfoForAccreditedModule(
+    accreditedModule: AccreditedModule,
+    allSemesters: Semester[],
+    allAccreditedModules: AccreditedModule[]
+  ): ModuleValidationInfo | null {
     if (accreditedModule.moduleId) {
       return this.getValidationInfoForModuleAlreadyInPlan(accreditedModule.moduleId, allSemesters, false);
     }
