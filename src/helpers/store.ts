@@ -189,8 +189,6 @@ export const store = createStore({
     },
   }
 });
-
-// todo: include accredited?
 function getEarnedEcts(category?: Category): number {
   if (store.getters.startSemester === undefined) {
     return 0;
@@ -201,14 +199,17 @@ function getEarnedEcts(category?: Category): number {
     return 0;
   }
 
-  return store.getters.enrichedSemesters
+  const ectsInSemesters = store.getters.enrichedSemesters
     .slice(0, indexOfLastCompletedSemester)
     .flatMap((semester) => semester.modules)
     .filter((module) => !category || category.moduleIds.includes(module.id))
     .reduce((previousTotal, module) => previousTotal + module.ects, 0);
+  const accreditedEcts = store.getters.accreditedModules
+    .filter(module => !category || module.categoryIds.includes(category.id))
+    .reduce((previousTotal, module) => previousTotal + module.ects, 0);
+  return ectsInSemesters + accreditedEcts;
 }
 
-// todo: include accredited?
 function getPlannedEcts(category?: Category): number {
   if (store.getters.startSemester === undefined) {
     return 0;

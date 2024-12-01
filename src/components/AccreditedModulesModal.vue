@@ -55,7 +55,8 @@
                         <option v-for="category in selectableCategories" :key="category.id" @click="onCategoryClicked(category)">{{ category.name }}</option>
                       </select>
                     </div>
-                  </div>                   <span>{{ externalCategories.map(c => c.name).join(', ') }}</span>
+                  </div>
+                  <span>{{ externalCategories.map(c => c.name).join(', ') }}</span>
                   <div class="flex justify-end">
                     <button class="bg-gray-800 text-white py-1 px-2 rounded" type="button" @click="addExternalEcts">hinzufügen</button>
                   </div>
@@ -69,7 +70,7 @@
               <span>Ausgewählte Module:</span>
               <div class="flex flex-wrap ml-1">
               <div v-for="accreditedModule in accreditedModules" class="m-1">
-                <AccreditedModuleBadge :accredited-module="accreditedModule"></AccreditedModuleBadge>
+                <AccreditedModuleBadge :accredited-module="accreditedModule" @on-remove-clicked="removeAccreditedModule(accreditedModule)" />
               </div>
             </div>
             </div>
@@ -162,6 +163,9 @@ export default defineComponent({
         this.externalEcts = 0;
         this.externalCategories = [];
       }
+    },
+    removeAccreditedModule(accreditedModule: AccreditedModule) {
+      this.accreditedModules.splice(this.accreditedModules.indexOf(accreditedModule), 1);
     },
     saveChanges() {
       if(!this.accreditedModules.length) {

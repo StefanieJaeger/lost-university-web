@@ -26,7 +26,6 @@ import { defineComponent, type PropType } from 'vue';
 import type { AccreditedModule } from '../helpers/types';
 import { getColorClassForPrioritizedCategory } from '../helpers/color-helper';
 import { store } from '../helpers/store';
-import { StorageHelper } from '../helpers/storage-helper';
 
 export default defineComponent({
   name: 'AccreditedModuleBadge',
@@ -36,6 +35,7 @@ export default defineComponent({
       required: true,
     }
   },
+  emits: ['on-remove-clicked'],
   computed: {
     computedClasses() {
       const classes = [this.getColorClassForPrioritizedCategory(this.accreditedModule.categoryIds)];
@@ -47,14 +47,18 @@ export default defineComponent({
       return classes;
     },
     tooltip() {
-      return this.accreditedModule.validationInfo?.tooltip ?? `${this.accreditedModule.name} - ${this.accreditedModule.ects} - ${this.accreditedModule.categoryIds.join(', ')}`;
+      if(this.accreditedModule.validationInfo) {
+        return this.accreditedModule.validationInfo.tooltip;
+      }
+
+      const categoryNames = this.accreditedModule.categoryIds.map(id => store.getters.categories.find(c => c.id === id)?.name).join(', ');
+      return `${this.accreditedModule.name} - ${this.accreditedModule.ects} - ${categoryNames}`;
     }
   },
   methods: {
     getColorClassForPrioritizedCategory,
     removeModule() {
-      store.commit('removeAccreditedModule', this.accreditedModule);
-      StorageHelper.updateUrlFragment();
+      this.$emit('on-remove-clicked');
     }
   }
 });

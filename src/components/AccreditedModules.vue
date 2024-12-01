@@ -6,7 +6,7 @@
     </div>
     <div v-if="accreditedModules.length" class="flex flex-wrap">
       <div v-for="accreditedModule in accreditedModules" class="mr-2 mb-2">
-        <AccreditedModuleBadge :accredited-module="accreditedModule" />
+        <AccreditedModuleBadge :accredited-module="accreditedModule" @on-remove-clicked="removeAccreditedModule(accreditedModule)" />
       </div>
     </div>
   </div>
@@ -17,6 +17,9 @@ import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import AccreditedModulesModal from './AccreditedModulesModal.vue';
 import AccreditedModuleBadge from './AccreditedModuleBadge.vue';
+import { store } from '../helpers/store';
+import { StorageHelper } from '../helpers/storage-helper';
+import type { AccreditedModule } from '../helpers/types';
 
 export default defineComponent({
   name: 'AccreditedModules',
@@ -25,8 +28,9 @@ export default defineComponent({
     ...mapGetters(['accreditedModules']),
   },
   methods: {
-    openModal() {
-
+    removeAccreditedModule(accreditedModule: AccreditedModule) {
+      store.commit('removeAccreditedModule', accreditedModule);
+      StorageHelper.updateUrlFragment();
     }
   }
 });
