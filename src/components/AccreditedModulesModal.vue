@@ -153,6 +153,10 @@ export default defineComponent({
     },
     addExternalEcts() {
       if(this.externalName && this.externalEcts && this.externalCategories.length) {
+        if(this.externalName.match(/[\.\-\_\~]/g)) {
+          console.error('".", "-", "_" and "~" not allowed in name');
+          return;
+        }
         this.accreditedModules.push(AccreditedModule.createFromExternalData(this.externalName, this.externalEcts, this.externalCategories.map(c => c.id)));
         this.externalName = '';
         this.externalEcts = 0;
