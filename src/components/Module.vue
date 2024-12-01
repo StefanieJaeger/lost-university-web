@@ -55,13 +55,11 @@ export default defineComponent({
   emits: ['on-delete'],
   computed: {
     computedClasses() {
-      const classesObj = { };
-      classesObj[this.getColorClassForPrioritizedCategory(this.module.categoriesForColoring)] = true;
-      if (this.module.validationInfo?.severity === 'hard') {
-        classesObj['border-red-500'] = true;
-        classesObj['border-4'] = true;
+      const classes = [this.getColorClassForPrioritizedCategory(this.module.categoriesForColoring)];
+      if(this.module.validationInfo?.severity === 'hard') {
+        classes.push(...['border-red-500', 'border-4']);
       }
-      return classesObj;
+      return classes;
     }
   },
   methods: {

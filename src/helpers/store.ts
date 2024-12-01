@@ -30,7 +30,7 @@ export const store = createStore({
       moduleIds.map((id) => state.modules.find((module) => module.id === id)).filter(f => f),
     totalPlannedEcts: () => getPlannedEcts(),
     totalEarnedEcts: () => getEarnedEcts(),
-    plannedModuleIds: state => state.semesters.flatMap(semester => semester.moduleIds),
+    allPlannedModuleIds: state => state.semesters.flatMap(semester => semester.moduleIds).concat(state.accreditedModules.map(m => m.moduleId)).filter(id => id),
     startSemester: state => state.startSemester,
     studienordnung: state => state.studienordnung,
     validationEnabled: state => state.validationEnabled,
@@ -47,7 +47,7 @@ export const store = createStore({
         modules: getters.modulesByIds(category.moduleIds),
       })),
     enrichedFocuses: (state, getters) => {
-      const plannedModuleIds = getters.plannedModuleIds;
+      const plannedModuleIds = getters.allPlannedModuleIds;
       const numberOfModulesRequiredToGetFocus = 8;
       return state.focuses.map(focus => ({
         ...focus,
@@ -121,9 +121,11 @@ export const store = createStore({
     },
     updateValidationInfoOfAllModules(state, enrichedSemesters: Semester[]) {
       if(state.validationEnabled) {
-        state.modules.forEach(module => module.validateModule(enrichedSemesters));
+        state.modules.forEach(module => module.validateModule(enrichedSemesters, state.accreditedModules));
+        state.accreditedModules.forEach(module => module.validateModule(enrichedSemesters, state.accreditedModules));
       } else {
         state.modules.forEach(module => module.validationInfo = null);
+        state.accreditedModules.forEach(module => module.validationInfo = null);
       }
     },
     addAccreditedModules(state, accreditedModules: AccreditedModule[]) {

@@ -162,7 +162,7 @@ export default defineComponent({
         (this.showNextPossibleSemester && !module.nextPossibleSemester)
     },
     moduleIsInPlan(module: Module): boolean {
-      return store.getters.plannedModuleIds.includes(module.id);
+      return store.getters.allPlannedModuleIds.includes(module.id);
     },
     moduleHasWrongTerm(module: Module): boolean {
       if(this.termForWhichToSearch !== 'both' && module.term !== 'both') {
