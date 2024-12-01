@@ -144,7 +144,7 @@
 
           <div
             v-if="accreditedModules.length"
-            class="m-4"
+            class="grid grid-flow-row m-4"
           >
             <div>
               <span>Ausgewählte Module:</span>
@@ -161,7 +161,6 @@
                 </div>
               </div>
             </div>
-
             <button
               class="bg-gray-800 text-white py-1 px-2 rounded"
               type="button"
