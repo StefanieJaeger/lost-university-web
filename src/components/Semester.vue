@@ -37,7 +37,8 @@
     <template #footer>
       <ModuleSearch
         :show-next-possible-semester="false"
-        :width-class="'w-2/3'"
+        :button-width-class="'w-2/3'"
+        :flyout-width-class="'w-64'"
         :term-for-which-to-search="term"
         :disable-based-on-term="!isInPast"
         @on-module-selected="(name: string) => addModule(name)"

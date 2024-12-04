@@ -3,14 +3,14 @@
     v-if="!isSearching"
     class="h-8 bg-gray-800 text-white p-1 rounded"
     type="button"
-    :class="[widthClass]"
+    :class="[buttonWidthClass]"
     @click="startSearching()"
   >
     +
   </button>
   <div
     v-if="isSearching"
-    class="w-72"
+    :class="[flyoutWidthClass]"
   >
     <Combobox
       :model-value="modelValue"
@@ -23,20 +23,20 @@
           class="relative w-full border-none text-sm py-2 pl-3 pr-10 bg-gray-100"
           :display-value="(e) => e?.id"
           @change="query = $event.target.value"
+          ref="comboboxInput"
         />
-        <ComboboxButton as="template">
-          <button
-            class="absolute right-2  my-auto"
-            type="button"
-            @click="isSearching = false"
-          >
-            <font-awesome-icon :icon="['fa', 'circle-xmark']" />
-          </button>
-        </ComboboxButton>
+        <ComboboxButton ref="buttonForOpening" class="absolute right-0 w-0 h-0">Button</ComboboxButton>
+        <button
+          class="absolute right-2 my-auto"
+          type="button"
+          @click="isSearching = false"
+        >
+          <font-awesome-icon :icon="['fa', 'circle-xmark']" />
+        </button>
       </div>
       <ComboboxOptions
-        static
-        class="absolute max-h-72 w-72 overflow-auto rounded-b-md shadow-lg bg-gray-100 z-40"
+        :class="[flyoutWidthClass]"
+        class="absolute max-h-72 overflow-auto rounded-b-md shadow-lg bg-gray-100 z-40"
       >
         <div
           v-for="group in groupedModules"
@@ -135,9 +135,13 @@ export default defineComponent({
       type: Boolean,
       required: true
     },
-    widthClass: {
+    buttonWidthClass: {
       type: String,
-      required: true
+      requird: true,
+    },
+    flyoutWidthClass: {
+      type: String,
+      default: 'w-72'
     },
     termForWhichToSearch: {
       type: String as () => Term,
@@ -199,7 +203,14 @@ export default defineComponent({
           };
         });
       }
+      this.query = '';
       this.isSearching = true;
+      this.$nextTick(() => {
+          const buttonForOpening = this.$refs.buttonForOpening;
+          if(buttonForOpening.el) {
+            buttonForOpening.el.click();
+          }
+        });
     },
     toggleGroup(id: string) {
       const group = this.groupedModules.find(f => f.id === id);

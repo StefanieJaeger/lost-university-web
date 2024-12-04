@@ -47,7 +47,7 @@
                   <div class="grid grid-flow-row">
                     <div>
                       <ModuleSearch
-                        :width-class="'w-16'"
+                        :button-width-class="'w-16'"
                         :show-next-possible-semester="false"
                         @on-module-selected="moduleName => onModuleSelected(moduleName)"
                       />
