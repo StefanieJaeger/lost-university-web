@@ -10,7 +10,7 @@
   </button>
   <div
     v-if="isSearching"
-    :class="[flyoutWidthClass]"
+    :class="[listWidthClass]"
   >
     <Combobox
       :model-value="modelValue"
@@ -35,7 +35,8 @@
         </button>
       </div>
       <ComboboxOptions
-        :class="[flyoutWidthClass]"
+      static
+        :class="[listWidthClass]"
         class="absolute max-h-72 overflow-auto rounded-b-md shadow-lg bg-gray-100 z-40"
       >
         <div
@@ -139,7 +140,7 @@ export default defineComponent({
       type: String,
       requird: true,
     },
-    flyoutWidthClass: {
+    listWidthClass: {
       type: String,
       default: 'w-72'
     },
@@ -208,6 +209,7 @@ export default defineComponent({
       this.$nextTick(() => {
           const buttonForOpening = this.$refs.buttonForOpening;
           if(buttonForOpening.el) {
+            // this focuses the input and ensures that blur will close the list
             buttonForOpening.el.click();
           }
         });
