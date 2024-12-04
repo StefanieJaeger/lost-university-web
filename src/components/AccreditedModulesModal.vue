@@ -87,6 +87,9 @@
                         required
                         maxlength="30"
                       >
+                      <span v-if="showNameErrorHint" class="text-red-400 text-xs">
+                        Name darf ".", "-", "_", "~" nicht enthalten und max 30 Zeichen sein
+                      </span>
                     </div>
                     <div>
                       <label
@@ -214,6 +217,7 @@ export default defineComponent({
       externalEcts: 0,
       externalCategories: [] as Category[],
       selectedModules: [] as Module[],
+      showNameErrorHint: false,
     };
   },
   computed: {
@@ -234,13 +238,6 @@ export default defineComponent({
         this.selectedModules.push(module);
       }
     },
-    // onCategoryClicked(category: Category) {
-    //   if(this.externalCategories.includes(category)){
-    //     this.externalCategories = this.externalCategories.filter(c => c.id !== category.id);
-    //   } else {
-    //     this.externalCategories.push(category);
-    //   }
-    // },
     addExistingModule() {
       this.accreditedModules.push(...this.selectedModules.map(m => AccreditedModule.createFromExistingModule(m)));
       this.selectedModules = [];
@@ -249,6 +246,7 @@ export default defineComponent({
       if(this.externalName && this.externalEcts && this.externalCategories.length) {
         if(this.externalName.match(/[.\-_~]/g)) {
           console.error('".", "-", "_" and "~" not allowed in name');
+          this.showNameErrorHint = true;
           return;
         }
         this.accreditedModules.push(
