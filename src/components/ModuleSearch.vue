@@ -20,12 +20,17 @@
     >
       <div class="relative w-full h-8 overflow-hidden rounded-t-lg shadow-md flex items-center">
         <ComboboxInput
+          ref="comboboxInput"
           class="relative w-full border-none text-sm py-2 pl-3 pr-10 bg-gray-100"
           :display-value="(e) => e?.id"
           @change="query = $event.target.value"
-          ref="comboboxInput"
         />
-        <ComboboxButton ref="buttonForOpening" class="absolute right-0 w-0 h-0">Button</ComboboxButton>
+        <ComboboxButton
+          ref="buttonForOpening"
+          class="absolute right-0 w-0 h-0"
+        >
+          Button
+        </ComboboxButton>
         <button
           class="absolute right-2 my-auto"
           type="button"
@@ -138,7 +143,7 @@ export default defineComponent({
     },
     buttonWidthClass: {
       type: String,
-      requird: true,
+      required: true,
     },
     listWidthClass: {
       type: String,
