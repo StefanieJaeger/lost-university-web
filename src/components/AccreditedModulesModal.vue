@@ -112,7 +112,7 @@
                           <ListboxButton class="w-full min-h-8 rounded-lg bg-gray-100 p-2 text-left shadow-md">
                             {{ externalCategories.map((c) => c.name).join(', ') }}
                           </ListboxButton>
-                          <ListboxOptions class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg">
+                          <ListboxOptions class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg z-40">
                             <ListboxOption v-for="cat in selectableCategories" :key="cat.id" :value="cat" v-slot="{ active, selected }" as="template">
                               <li class="px-2 my-1" :class="[selected ? 'bg-slate-200' : '']">
                                 <span class="">
