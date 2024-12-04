@@ -35,9 +35,9 @@
         </button>
       </div>
       <ComboboxOptions
-      static
+        static
         :class="[listWidthClass]"
-        class="absolute max-h-72 overflow-auto rounded-b-md shadow-lg bg-gray-100 z-40"
+        class="max-h-72 overflow-auto rounded-b-md shadow-lg bg-gray-100 z-40"
       >
         <div
           v-for="group in groupedModules"
