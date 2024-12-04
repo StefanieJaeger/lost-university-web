@@ -41,7 +41,7 @@
         :list-width-class="'w-64'"
         :container-bound="true"
         :term-for-which-to-search="term"
-        :disable-based-on-term="!isInPast"
+        :disable-invalid-modules="!isInPast"
         @on-module-selected="(moduleId) => addModule(moduleId)"
       />
       <div class="mt-auto p-2">
