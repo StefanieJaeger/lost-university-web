@@ -24,7 +24,7 @@ const getColorClassForCategoryId = (categoryId: ColorClassCategoryKey) =>
 const getColorClassForPrioritizedCategory = (categoryIds: string[]) => {
   const prioritzedCategory = categoryIds
     .map((categoryId) => ({ id: categoryId, priority: CATEGORY_COLOR_PRIORITIES[categoryId] ?? 0 }))
-    .sort((a, b) => b.priority === a.priority ? (a.id > b.id ? -1 : 1) : b.priority - a.priority)[0];
+    .sort((a, b) => b.priority === a.priority ? (a.id > b.id ? 1 : -1) : b.priority - a.priority)[0];
 
   return prioritzedCategory ? getColorClassForCategoryId(prioritzedCategory.id) : CATEGORY_COLOR_CLASS_MAP.Fallback;
 };

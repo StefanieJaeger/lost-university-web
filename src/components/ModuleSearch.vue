@@ -36,7 +36,7 @@
       </div>
       <ComboboxOptions
         static
-        :class="[listWidthClass]"
+        :class="[listWidthClass, containerBound ? 'inherit' : 'absolute']"
         class="max-h-72 overflow-auto rounded-b-md shadow-lg bg-gray-100 z-40"
       >
         <div
@@ -143,6 +143,10 @@ export default defineComponent({
     listWidthClass: {
       type: String,
       default: 'w-72'
+    },
+    containerBound: {
+      type: Boolean,
+      default: false
     },
     termForWhichToSearch: {
       type: String as () => Term,

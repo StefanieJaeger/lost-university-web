@@ -39,6 +39,7 @@
         :show-next-possible-semester="false"
         :button-width-class="'w-2/3'"
         :list-width-class="'w-64'"
+        :container-bound="true"
         :term-for-which-to-search="term"
         :disable-based-on-term="!isInPast"
         @on-module-selected="(name: string) => addModule(name)"
