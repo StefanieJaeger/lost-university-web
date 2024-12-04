@@ -74,7 +74,7 @@
                   </div>
                 </TabPanel>
                 <TabPanel>
-                  <div class="grid grid-rows-2 grid-cols-2 gap-2">
+                  <div class="grid grid-rows-[auto_auto] grid-cols-2 gap-2 mb-4">
                     <div>
                       <label
                         for="external-name"
@@ -102,32 +102,26 @@
                         min="1"
                       >
                     </div>
-                    <div>
-                      <label
-                        for="external-categories"
-                        class="mr-1"
-                      >Kategorien</label>
-                      <select
-                        id="external-categories"
-                        class="w-1/6"
-                      >
-                        <option
-                          value=""
-                          disabled
-                          selected
-                          hidden
-                        />
-                        <option
-                          v-for="category in selectableCategories"
-                          :key="category.id"
-                          @click="onCategoryClicked(category)"
-                        >
-                          {{ category.name }}
-                        </option>
-                      </select>
+                    <div class="col-span-2">
+                      <Listbox v-model="externalCategories" multiple>
+                        <div class="relative">
+                          <ListboxLabel>Kategorien</ListboxLabel>
+                          <ListboxButton class="w-full min-h-8 rounded-lg bg-gray-100 p-2 text-left shadow-md">
+                            {{ externalCategories.map((c) => c.name).join(', ') }}
+                          </ListboxButton>
+                          <ListboxOptions class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg">
+                            <ListboxOption v-for="cat in selectableCategories" :key="cat.id" :value="cat" v-slot="{ active, selected }" as="template">
+                              <li class="px-2 my-1" :class="[selected ? 'bg-slate-200' : '']">
+                                <span class="">
+                                  {{ cat.name }}
+                                </span>
+                              </li>
+                            </ListboxOption>
+                          </ListboxOptions>
+                        </div>
+                      </Listbox>
                     </div>
                   </div>
-                  <span>{{ externalCategories.map(c => c.name).join(', ') }}</span>
                   <div class="flex justify-end">
                     <button
                       class="bg-gray-800 text-white py-1 px-2 rounded"
@@ -184,7 +178,12 @@ import {
   TabList,
   Tab,
   TabPanels,
-  TabPanel
+  TabPanel,
+  Listbox,
+  ListboxLabel,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption
 } from '@headlessui/vue';
 import { AccreditedModule, Category, Module } from '../helpers/types';
 import ModuleSearch from './ModuleSearch.vue';
@@ -203,7 +202,12 @@ export default defineComponent({
     TabPanels,
     TabPanel,
     ModuleSearch,
-    AccreditedModuleBadge
+    AccreditedModuleBadge,
+    Listbox,
+    ListboxLabel,
+    ListboxButton,
+    ListboxOptions,
+    ListboxOption
   },
   data() {
     return {
@@ -233,13 +237,13 @@ export default defineComponent({
         this.selectedModules.push(module);
       }
     },
-    onCategoryClicked(category: Category) {
-      if(this.externalCategories.includes(category)){
-        this.externalCategories = this.externalCategories.filter(c => c.id !== category.id);
-      } else {
-        this.externalCategories.push(category);
-      }
-    },
+    // onCategoryClicked(category: Category) {
+    //   if(this.externalCategories.includes(category)){
+    //     this.externalCategories = this.externalCategories.filter(c => c.id !== category.id);
+    //   } else {
+    //     this.externalCategories.push(category);
+    //   }
+    // },
     addExistingModule() {
       this.accreditedModules.push(...this.selectedModules.map(m => AccreditedModule.createFromExistingModule(m)));
       this.selectedModules = [];
