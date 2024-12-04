@@ -136,10 +136,7 @@
             </TabGroup>
           </div>
 
-          <div
-            v-if="accreditedModules.length"
-            class="grid grid-flow-row m-4"
-          >
+          <div class="grid grid-flow-row m-4">
             <div>
               <span>Ausgewählte Module:</span>
               <div class="flex flex-wrap ml-1">
@@ -156,7 +153,7 @@
               </div>
             </div>
             <button
-              class="bg-gray-800 text-white py-1 px-2 rounded"
+              class="bg-gray-800 text-white py-1 px-2 ml-auto rounded"
               type="button"
               @click="saveChanges"
             >
