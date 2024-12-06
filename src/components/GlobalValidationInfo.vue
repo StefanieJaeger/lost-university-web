@@ -14,15 +14,15 @@
         />
       </DisclosureButton>
       <DisclosurePanel class="w-full px-4 py-2 text-gray-500">
-        <ul class="list-disc list-inside">
+        <ul class="list-inside">
           <li
             v-for="problem in duplicateModulesProblems"
             :key="problem.moduleId"
-            class="h-8 place-content-center"
+            class="place-content-center"
           >
-            <span class="mr-2">{{ problem.text }}</span>
+            <div class="mr-2">{{ problem.text }}</div>
             <button
-              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1  px-2 py-1 rounded"
               type="button"
               @click="removeModule(problem.moduleId, problem.semesterNumbersToRemoveFrom)"
             >
@@ -30,15 +30,15 @@
             </button>
           </li>
         </ul>
-        <ul class="list-disc list-inside">
+        <ul class="list-inside">
           <li
             v-for="problem in inactiveModuleProblems"
             :key="problem.moduleId"
-            class="h-8 place-content-center"
+            class="place-content-center"
           >
-            <span class="mr-2">{{ problem.text }}</span>
+            <div class="mr-2">{{ problem.text }}</div>
             <button
-              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1 px-2 py-1 rounded"
               type="button"
               @click="removeModule(problem.moduleId)"
             >
@@ -46,7 +46,7 @@
             </button>
             <button
               v-if="problem.successorModuleId"
-              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1  px-2 py-1 rounded"
               type="button"
               @click="replaceModuleWithSuccessor(problem.moduleId, problem.successorModuleId)"
             >
@@ -54,22 +54,22 @@
             </button>
           </li>
         </ul>
-        <ul class="list-disc list-inside">
+        <ul class="list-inside">
           <li
             v-for="problem in wrongTermProblems"
             :key="problem.moduleId"
-            class="h-8 place-content-center"
+            class="place-content-center"
           >
-            <span class="mr-2">{{ problem.text }}</span>
+            <div class="mr-2">{{ problem.text }}</div>
             <button
-              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1  px-2 py-1 rounded"
               type="button"
               @click="removeModule(problem.moduleId)"
             >
               entfernen
             </button>
             <button
-              class="bg-gray-800 text-white text-xs ml-2 px-2 py-1 rounded"
+              class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1  px-2 py-1 rounded"
               type="button"
               @click="moveModuleToSemester(problem.moduleId, problem.targetSemesterNumber)"
             >
