@@ -20,7 +20,9 @@
             :key="problem.moduleId"
             class="place-content-center"
           >
-            <div class="mr-2">{{ problem.text }}</div>
+            <div class="mr-2">
+              {{ problem.text }}
+            </div>
             <button
               class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1  px-2 py-1 rounded"
               type="button"
@@ -36,7 +38,9 @@
             :key="problem.moduleId"
             class="place-content-center"
           >
-            <div class="mr-2">{{ problem.text }}</div>
+            <div class="mr-2">
+              {{ problem.text }}
+            </div>
             <button
               class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1 px-2 py-1 rounded"
               type="button"
@@ -60,7 +64,9 @@
             :key="problem.moduleId"
             class="place-content-center"
           >
-            <div class="mr-2">{{ problem.text }}</div>
+            <div class="mr-2">
+              {{ problem.text }}
+            </div>
             <button
               class="bg-gray-800 text-white text-xs ml-2 mb-2 mt-1  px-2 py-1 rounded"
               type="button"
