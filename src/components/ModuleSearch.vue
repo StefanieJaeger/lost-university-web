@@ -209,7 +209,13 @@ export default defineComponent({
         });
         const modulesInGroups = groups.flatMap(g => g.modules).map(m => m.id);
         const modulesNotInGroups = store.getters.modules.filter(m => !modulesInGroups.includes(m.id));
-        this.groupedModules =  groups.concat({ id: 'none', name: 'Ohne', modules: modulesNotInGroups, isOpen: this.categoryId ? false : true, colorClass: getColorClassForCategoryId('') });
+        this.groupedModules =  groups.concat({
+          id: 'none',
+          name: 'Ohne',
+          modules: modulesNotInGroups,
+          isOpen: this.categoryId ? false : true,
+          colorClass: getColorClassForCategoryId('')
+        });
       }
       this.query = '';
       this.isSearching = true;
